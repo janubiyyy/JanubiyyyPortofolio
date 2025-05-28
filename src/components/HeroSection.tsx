@@ -47,7 +47,7 @@ const HeroSection = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center animate-fade-in">
           {/* Profile Image */}
-          <div className="mb-8 flex justify-center">
+          <div className="mt-32 sm:mt-25 md:mt-25 mb-8 flex justify-center">
             <div className="relative">
               <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-gradient-to-br from-amber-500 to-orange-600 p-1 bg-gradient-to-br from-amber-500 to-orange-600">
                 <img
