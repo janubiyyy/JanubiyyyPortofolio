@@ -67,7 +67,7 @@ const AboutSection = () => {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-transparent bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text">
-                      15+
+                      7+
                     </div>
                     <div className="text-sm text-muted-foreground">
                       {t("projectsCompleted")}

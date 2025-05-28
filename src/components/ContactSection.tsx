@@ -37,7 +37,7 @@ const ContactSection = () => {
     {
       type: "Website",
       value: "profile.janubiyyy.tech",
-      href: "https://profile.janubiyyy.tech/",
+      href: "https://janubiyyy-portofolio.vercel.app/",
       icon: <Globe className="w-5 h-5" />,
     },
   ];
@@ -50,7 +50,7 @@ const ContactSection = () => {
     },
     {
       name: "Portfolio",
-      url: "https://profile.janubiyyy.tech/",
+      url: "https://janubiyyy-portofolio.vercel.app/",
       icon: "🌐",
     },
     {
@@ -270,8 +270,8 @@ ${formData.name} 🙏
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {language === "id"
-                    ? "Pesan akan dikirim langsung ke WhatsApp saya dengan template yang menarik dan profesional!"
-                    : "Message will be sent directly to my WhatsApp with an attractive and professional template!"}
+                    ? "Pesan akan dikirim langsung ke WhatsApp saya!"
+                    : "Message will be sent directly to my WhatsApp!"}
                 </p>
               </div>
 
@@ -409,7 +409,7 @@ ${formData.name} 🙏
                   className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  💬{" "}
+
                   {language === "id"
                     ? "Kirim via WhatsApp"
                     : "Send via WhatsApp"}
@@ -418,8 +418,8 @@ ${formData.name} 🙏
                 <p className="text-xs text-center text-muted-foreground">
                   ✨{" "}
                   {language === "id"
-                    ? "Pesan akan otomatis dikirim ke WhatsApp dengan format yang menarik, interaktif dan profesional"
-                    : "Message will be automatically sent to WhatsApp with an attractive, interactive and professional format"}
+                    ? "Pesan akan otomatis dikirim ke WhatsApp "
+                    : "Message will be automatically sent to WhatsApp"}
                 </p>
               </form>
             </div>

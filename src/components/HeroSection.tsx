@@ -104,7 +104,7 @@ const HeroSection = () => {
             </div>
             <div className="text-center p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 dark:border-gray-700/50">
               <div className="text-3xl font-bold text-transparent bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text">
-                15+
+                7+
               </div>
               <div className="text-sm text-muted-foreground mt-1">
                 {t("projectsCompleted")}
