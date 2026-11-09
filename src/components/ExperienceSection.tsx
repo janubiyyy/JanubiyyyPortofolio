@@ -1,23 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   CalendarDays,
   MapPin,
-  Briefcase,
   CheckCircle2,
-  TrendingUp,
+  ChevronUp,
+  ChevronDown,
+  ShieldCheck,
   Building2,
-  ExternalLink,
+  Clock,
 } from "lucide-react";
 
-const ExperienceSection = () => {
-  const { language } = useLanguage();
-  const [activeExp, setActiveExp] = useState(0);
+interface Experience {
+  id: string;
+  number: string;
+  company: string;
+  client: string;
+  position: string;
+  period: string;
+  location: string;
+  badge: string;
+  current: boolean;
+  summary: string;
+  responsibilities: string[];
+  tags: string[];
+}
 
-  const experiences = [
+const ExperienceSection: React.FC = () => {
+  const { language } = useLanguage();
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [direction, setDirection] = useState<"up" | "down">("down");
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // 3D Tilt state
+  const [tilt, setTilt] = useState({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
+  const cardRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef<number | null>(null);
+
+  const experiences: Experience[] = [
     {
+      id: "mii-jasamarga",
+      number: "01",
       company: "MII (Mitra Integrasi Informatika)",
-      client: "Jasa Marga Project Placement",
+      client: "PT Jasa Marga (Persero) Tbk Placement",
       position: "Frontend Developer",
       period: `Jan 2025 – ${language === "id" ? "Sekarang" : "Present"}`,
       location: "Jakarta, Indonesia",
@@ -25,57 +50,61 @@ const ExperienceSection = () => {
       current: true,
       summary:
         language === "id"
-          ? "Bertanggung jawab atas pengembangan aplikasi web internal skala enterprise untuk operasional jalan tol PT Jasa Marga (Persero) Tbk melalui penempatan resmi MII."
-          : "Responsible for developing enterprise-grade internal web applications for toll road operations at PT Jasa Marga (Persero) Tbk through MII placement.",
+          ? "Bertanggung jawab atas rekayasa aplikasi web enterprise untuk pemantauan operasional jalan tol PT Jasa Marga (Persero) Tbk melalui penempatan resmi MII."
+          : "Responsible for engineering mission-critical internal web portals for toll road operations and asset monitoring at PT Jasa Marga (Persero) Tbk through official MII placement.",
       responsibilities:
         language === "id"
           ? [
-              "Mengembangkan portal web enterprise menggunakan Next.js dan TypeScript untuk sistem operasional tol dan pemantauan lalu lintas real-time.",
-              "Membangun dashboard analitik berbasis data dan antarmuka validasi transaksi terintegrasi REST API.",
-              "Mendukung otomatisasi alur kerja CI/CD menggunakan Jenkins, GitLab, dan deployment kluster OpenShift.",
-              "Berkolaborasi erat dengan Backend Engineer, System Analyst, dan tim QA untuk memastikan stabilitas sistem tanpa downtime.",
-              "Mengoptimalkan performa halaman dan Core Web Vitals untuk penanganan data operasional yang responsif.",
+              "Mengembangkan portal web enterprise menggunakan Next.js dan TypeScript untuk sistem operasional tol dan pemantauan transaksi real-time.",
+              "Membangun dashboard analitik berbasis data serta antarmuka validasi transaksi terintegrasi RESTful APIs.",
+              "Mendukung otomatisasi alur kerja CI/CD menggunakan Jenkins, GitLab, dan deployment kluster Red Hat OpenShift.",
+              "Berkolaborasi aktif dengan Backend Engineer, System Analyst, dan tim QA untuk menjaga keandalan sistem tanpa downtime.",
+              "Mengoptimalkan performa rendering halaman dan Core Web Vitals untuk penanganan data operasional yang responsif.",
             ]
           : [
-              "Developing enterprise web portals using Next.js and TypeScript for toll operations and real-time traffic monitoring.",
-              "Building data-driven analytical dashboards and transaction validation interfaces integrated with REST APIs.",
-              "Supporting CI/CD automated deployment workflows via Jenkins, GitLab, and OpenShift cluster deployments.",
-              "Collaborating closely with backend engineers, system analysts, and QA to maintain zero-downtime reliability.",
-              "Optimizing page performance, Core Web Vitals, and smooth data rendering across enterprise toll portals.",
+              "Developing enterprise web portals using Next.js and TypeScript for toll operations and real-time transaction monitoring.",
+              "Building data-driven analytical dashboards and transaction validation interfaces integrated with RESTful APIs.",
+              "Supporting CI/CD automated deployment workflows via Jenkins, GitLab, and Red Hat OpenShift cluster deployments.",
+              "Collaborating with backend engineers, system analysts, and QA to maintain high system reliability and zero-downtime.",
+              "Optimizing frontend rendering and Core Web Vitals for smooth, responsive enterprise data management.",
             ],
       tags: ["Next.js", "TypeScript", "REST API", "Jenkins", "GitLab", "OpenShift", "MUI", "Tailwind CSS"],
     },
     {
+      id: "erlangga",
+      number: "02",
       company: "PT Penerbit Erlangga",
       client: "Internal Web Engineering Team",
       position: "Frontend Developer",
       period: "Aug 2022 – Jan 2025",
       location: "Jakarta, Indonesia",
-      badge: "2 Years 6 Months",
+      badge: "2.5 Years",
       current: false,
       summary:
         language === "id"
-          ? "Mengembangkan dan memelihara ekosistem aplikasi web e-commerce, portal administrasi CMS, serta kalkulator pembiayaan otomotif untuk jutaan pengguna."
-          : "Engineered and maintained e-commerce web applications, CMS administrative portals, and automotive financial simulators serving extensive user bases.",
+          ? "Mengembangkan dan memelihara platform belanja e-commerce publik, portal administrasi CMS bisnis, serta kalkulator simulasi kredit pembiayaan mobil untuk jutaan pengguna."
+          : "Engineered and maintained e-commerce shopping storefronts, internal CMS admin portals, and an interactive car loan calculator serving high user volumes.",
       responsibilities:
         language === "id"
           ? [
-              "Membangun platform belanja online (EurekaBookhouse, Jaja.id) menggunakan Vue.js, Vuex, Vuetify, dan Tailwind CSS.",
+              "Membangun antarmuka e-commerce (EurekaBookhouse, Jaja.id) menggunakan Vue.js, Vuex, Vuetify, dan Tailwind CSS.",
               "Mengembangkan dashboard administrasi CMS kustom (Katarasa, EurekaBookhouse) dengan React.js, Redux, dan Ant Design.",
-              "Menciptakan tool simulasi kredit mobil interaktif (Jaja Auto) dengan perhitungan reaktif instan menggunakan Lodash.",
-              "Menerjemahkan desain Figma menjadi antarmuka responsif dengan akurasi piksel tinggi dan kompatibilitas lintas browser.",
-              "Menerapkan strategi lazy loading aset dan optimasi bundling untuk kecepatan akses pengguna yang optimal.",
+              "Menciptakan tool simulasi kredit mobil interaktif (Jaja Auto) dengan komputasi reaktif instan menggunakan Lodash.",
+              "Menerjemahkan rancangan Figma menjadi antarmuka responsif dengan akurasi piksel tinggi dan kompatibilitas lintas browser.",
+              "Menerapkan strategi progressive lazy loading gambar dan optimasi bundel untuk kecepatan akses pengguna.",
             ]
           : [
               "Built online commerce storefronts (EurekaBookhouse, Jaja.id) using Vue.js, Vuex, Vuetify, and Tailwind CSS.",
-              "Developed custom admin CMS dashboards (Katarasa, EurekaBookhouse) with React.js, Redux, and Ant Design.",
+              "Developed custom admin CMS dashboards (Katarasa, EurekaBookhouse) using React.js, Redux, and Ant Design.",
               "Engineered interactive car financing simulation tools (Jaja Auto) with instant reactive computations via Lodash.",
               "Translated Figma specifications into responsive web interfaces with pixel-accurate fidelity across browsers.",
-              "Implemented progressive asset lazy-loading and bundle optimizations for responsive user experiences.",
+              "Implemented progressive image lazy loading and bundle splitting optimizations for responsive user experiences.",
             ],
-      tags: ["Vue.js", "React.js", "Vuex", "Redux", "Vuetify", "Ant Design", "Tailwind CSS", "Bootstrap Vue"],
+      tags: ["Vue.js", "React.js", "Vuex", "Redux", "Vuetify", "Ant Design", "Tailwind CSS", "REST API"],
     },
     {
+      id: "sociolla",
+      number: "03",
       company: "PT Sociolla Bella Indonesia",
       client: "Operations Leadership",
       position: "Team Leader",
@@ -85,162 +114,374 @@ const ExperienceSection = () => {
       current: false,
       summary:
         language === "id"
-          ? "Memimpin tim operasional dalam mencapai efisiensi alur kerja dan target kinerja tinggi, melatih keahlian komunikasi serta kepemimpinan lintas fungsi."
-          : "Led operational team exceeding performance targets, fostering cross-functional communication and structured problem-solving.",
+          ? "Memimpin tim operasional dalam mencapai efisiensi alur kerja harian dan target performa tinggi, melatih keahlian komunikasi serta kepemimpinan lintas fungsi."
+          : "Led operational team exceeding performance targets, fostering structured cross-functional communication and collaborative problem-solving.",
       responsibilities:
         language === "id"
           ? [
-              "Memimpin tim beranggotakan 10+ orang dalam perencanaan strategis dan koordinasi harian.",
-              "Meningkatkan kelancaran alur kerja tim melalui standardisasi proses kolaboratif.",
-              "Mengasah kemampuan komunikasi kritis yang menjadi fondasi kolaborasi rekayasa software dengan stakeholder.",
+              "Memimpin tim operasional dalam perencanaan strategis, evaluasi alur kerja, dan koordinasi harian.",
+              "Meningkatkan kelancaran eksekusi tim melalui standarisasi alur kerja kolaboratif.",
+              "Mengembangkan kemampuan komunikasi kritis dan manajemen prioritas yang menjadi fondasi kepemimpinan teknis saat ini.",
             ]
           : [
-              "Led a 10+ member operational team through strategic daily coordination and objective tracking.",
-              "Streamlined team workflow execution through standardized daily collaboration routines.",
-              "Cultivated critical communication and leadership abilities that empower software engineering collaboration today.",
+              "Led an operational team through strategic daily planning, workflow evaluation, and objective tracking.",
+              "Streamlined team execution through standardized collaborative processes and quality benchmarks.",
+              "Cultivated critical communication and priority management that form the backbone of technical collaboration today.",
             ],
       tags: ["Team Leadership", "Cross-Functional Collaboration", "Workflow Optimization", "Agile Mindset"],
     },
   ];
 
+  const currentExp = experiences[activeSlide];
+
+  // Vertical slide navigation
+  const goToSlide = useCallback((index: number) => {
+    if (index === activeSlide || isTransitioning) return;
+    setDirection(index > activeSlide ? "down" : "up");
+    setIsTransitioning(true);
+    setActiveSlide(index);
+    setTimeout(() => setIsTransitioning(false), 400);
+  }, [activeSlide, isTransitioning]);
+
+  const slideDown = useCallback(() => {
+    if (isTransitioning) return;
+    const next = (activeSlide + 1) % experiences.length;
+    setDirection("down");
+    setIsTransitioning(true);
+    setActiveSlide(next);
+    setTimeout(() => setIsTransitioning(false), 400);
+  }, [activeSlide, experiences.length, isTransitioning]);
+
+  const slideUp = useCallback(() => {
+    if (isTransitioning) return;
+    const prev = (activeSlide - 1 + experiences.length) % experiences.length;
+    setDirection("up");
+    setIsTransitioning(true);
+    setActiveSlide(prev);
+    setTimeout(() => setIsTransitioning(false), 400);
+  }, [activeSlide, experiences.length, isTransitioning]);
+
+  // Keyboard navigation (Up/Down keys)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        slideUp();
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        slideDown();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [slideDown, slideUp]);
+
+  // Touch vertical swipe on mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartY.current === null) return;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diff = touchStartY.current - touchEndY;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) slideDown();
+      else slideUp();
+    }
+    touchStartY.current = null;
+  };
+
+  // 3D Tilt calculation
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = -((y - centerY) / centerY) * 4;
+    const rotateY = ((x - centerX) / centerX) * 4;
+
+    setTilt({
+      x: rotateX,
+      y: rotateY,
+      glareX: (x / rect.width) * 100,
+      glareY: (y / rect.height) * 100,
+      opacity: 0.14,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
+  };
+
   return (
-    <section id="experience" className="py-24 relative" aria-label="Work experience">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="experience" className="py-24 relative overflow-hidden" aria-label="Work experience">
+      {/* Warm Ambient Radial Glow */}
+      <div className="absolute top-1/2 left-1/3 -translate-y-1/2 w-[550px] h-[350px] bg-[#c88746]/10 blur-[130px] rounded-full pointer-events-none" />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-6xl mx-auto">
           
           {/* Section Header */}
-          <div className="mb-14">
-            <span className="section-label mb-3">
-              {language === "id" ? "Riwayat Karier" : "Career Trajectory"}
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground mt-2">
-              {language === "id" ? "Pengalaman Rekayasa Profesional" : "Professional Work Experience"}
-            </h2>
-            <p className="text-muted-foreground mt-3 max-w-xl text-sm sm:text-base">
-              {language === "id"
-                ? "Rekam jejak kontribusi nyata pada sistem enterprise, platform e-commerce, dan aplikasi skala besar."
-                : "Demonstrated track record across enterprise toll road systems, retail e-commerce, and high-impact web apps."}
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+            <div>
+              <span className="section-label mb-3">
+                {language === "id" ? "Riwayat Karier" : "Career Trajectory"}
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground mt-2">
+                {language === "id" ? "Pengalaman Rekayasa Profesional" : "Professional Work Experience"}
+              </h2>
+              <p className="text-muted-foreground mt-2 max-w-xl text-sm">
+                {language === "id"
+                  ? "Jejak kontribusi rekayasa pada sistem tol enterprise, e-commerce ritel, dan platform CMS."
+                  : "Demonstrated track record across enterprise toll operations, retail e-commerce, and administrative platforms."}
+              </p>
+            </div>
+
+            {/* Vertical Controls Counter & Up/Down Arrows */}
+            <div className="flex items-center gap-3 self-start sm:self-auto">
+              <div className="px-3.5 py-1.5 rounded-full border border-border/80 bg-card/60 backdrop-blur-md text-xs font-mono font-semibold text-muted-foreground">
+                <span className="text-[#8a4b1f] dark:text-[#f0ca9f] font-bold">{currentExp.number}</span>
+                <span className="mx-1">/</span>
+                <span>0{experiences.length}</span>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={slideUp}
+                  aria-label="Previous role (slide up)"
+                  className="w-10 h-10 rounded-xl border border-border/80 bg-card/80 hover:border-[#c88746]/60 hover:text-[#c88746] hover:bg-[#c88746]/10 flex items-center justify-center transition-all duration-200 active:scale-95 shadow-sm"
+                  title="Previous role (Arrow Up)"
+                >
+                  <ChevronUp className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={slideDown}
+                  aria-label="Next role (slide down)"
+                  className="w-10 h-10 rounded-xl border border-border/80 bg-card/80 hover:border-[#c88746]/60 hover:text-[#c88746] hover:bg-[#c88746]/10 flex items-center justify-center transition-all duration-200 active:scale-95 shadow-sm"
+                  title="Next role (Arrow Down)"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Interactive Company Tabs Layout */}
+          {/* Vertical Trajectory Layout: Left Vertical Tabs + Right Vertical 3D Stage */}
           <div className="grid lg:grid-cols-12 gap-8 items-start">
             
-            {/* Left Tabs (Company Selection) */}
-            <div className="lg:col-span-4 flex flex-col gap-3">
-              {experiences.map((exp, index) => {
-                const isActive = activeExp === index;
+            {/* Left Column: Vertical Timeline Tabs (Tabnya ke Bawah) */}
+            <div className="lg:col-span-4 flex flex-col gap-3 relative">
+              
+              {/* Subtle Vertical Connector Track (Desktop) */}
+              <div className="hidden lg:block absolute left-6 top-6 bottom-6 w-0.5 bg-border/60 pointer-events-none" />
+
+              {experiences.map((exp, idx) => {
+                const isActive = activeSlide === idx;
                 return (
                   <button
-                    key={index}
-                    onClick={() => setActiveExp(index)}
-                    className={`text-left p-5 rounded-2xl border transition-all duration-300 relative ${
+                    key={exp.id}
+                    onClick={() => goToSlide(idx)}
+                    className={`relative z-10 text-left p-4 sm:p-5 rounded-2xl border transition-all duration-300 flex items-start gap-3.5 group ${
                       isActive
-                        ? "border-[#c88746] bg-[#c88746]/[0.08] shadow-lg shadow-[#c88746]/5"
+                        ? "border-[#c88746] bg-[#8a4b1f]/[0.08] dark:bg-[#c88746]/10 shadow-lg shadow-[#c88746]/10 scale-[1.02]"
                         : "border-border/80 bg-card/60 hover:bg-muted/60 hover:border-border"
                     }`}
                   >
+                    {/* Active Accent Bar */}
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-[#c88746] rounded-r-full" />
+                      <span className="absolute left-0 top-3 bottom-3 w-1.5 bg-[#8a4b1f] dark:bg-[#d49b64] rounded-r-full" />
                     )}
 
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[11px] font-mono text-muted-foreground">
-                        {exp.period}
-                      </span>
-                      {exp.current && (
-                        <span className="badge-available text-[10px] py-0.5 px-2">
-                          Active
+                    {/* Step Number Dot */}
+                    <div
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-mono text-xs font-bold flex-shrink-0 transition-colors mt-0.5 ${
+                        isActive
+                          ? "bg-[#8a4b1f] dark:bg-[#d49b64] text-white dark:text-[#181310] shadow-sm"
+                          : "bg-muted text-muted-foreground group-hover:text-foreground"
+                      }`}
+                    >
+                      {exp.number}
+                    </div>
+
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-mono text-muted-foreground">
+                          {exp.period}
+                        </span>
+                        {exp.current && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/25">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Active
+                          </span>
+                        )}
+                      </div>
+
+                      <h3
+                        className={`font-bold text-sm sm:text-base leading-snug transition-colors truncate ${
+                          isActive ? "text-foreground" : "text-foreground/80 group-hover:text-foreground"
+                        }`}
+                      >
+                        {exp.company}
+                      </h3>
+
+                      <p className="text-xs text-[#8a4b1f] dark:text-[#f0ca9f] font-semibold truncate">
+                        {exp.position}
+                      </p>
+
+                      <p className="text-[11px] text-muted-foreground/90 truncate">
+                        {exp.client}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+
+              {/* Vertical Navigation Hint */}
+              <div className="hidden lg:flex items-center gap-2 pt-2 px-2 text-[11px] font-mono text-muted-foreground/70">
+                <Clock className="w-3.5 h-3.5 text-[#c88746]" />
+                <span>Navigate roles with ↑ / ↓ keys</span>
+              </div>
+            </div>
+
+            {/* Right Column: 3D Interactive Vertical Stage Card */}
+            <div
+              className="lg:col-span-8 perspective-1200"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div
+                ref={cardRef}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                className={`relative rounded-3xl border border-[#c88746]/35 bg-card/95 backdrop-blur-xl p-6 sm:p-9 shadow-2xl shadow-[#8a4b1f]/10 preserve-3d transition-all duration-400 ease-out overflow-hidden ${
+                  isTransitioning
+                    ? direction === "down"
+                      ? "opacity-60 translate-y-3 scale-[0.99]"
+                      : "opacity-60 -translate-y-3 scale-[0.99]"
+                    : "opacity-100 translate-y-0 scale-100"
+                }`}
+                style={{
+                  transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+                }}
+              >
+                {/* Dynamic 3D Specular Glare Overlay */}
+                <div
+                  className="absolute inset-0 pointer-events-none transition-opacity duration-300 rounded-3xl"
+                  style={{
+                    background: `radial-gradient(circle 350px at ${tilt.glareX}% ${tilt.glareY}%, rgba(200, 135, 70, ${tilt.opacity}), transparent 70%)`,
+                  }}
+                />
+
+                {/* Card Header: Role Title, Company, Placement, & Date */}
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-border/70 relative z-10">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                        {currentExp.position}
+                      </h3>
+                      {currentExp.current ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          {currentExp.badge}
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground border border-border text-[11px] font-mono font-semibold">
+                          {currentExp.badge}
                         </span>
                       )}
                     </div>
 
-                    <h3 className="font-bold text-base text-foreground leading-snug">
-                      {exp.company}
-                    </h3>
-                    <p className="text-xs text-[#c88746] font-medium mt-0.5">
-                      {exp.position}
+                    <p className="text-sm sm:text-base font-bold text-[#8a4b1f] dark:text-[#f0ca9f] flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-[#c88746] flex-shrink-0" />
+                      <span>{currentExp.company}</span>
+                      <span className="text-muted-foreground font-normal text-xs sm:text-sm">
+                        ({currentExp.client})
+                      </span>
                     </p>
-                    <p className="text-[11px] text-muted-foreground mt-1">
-                      {exp.client}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Right Panel: Detailed Active Experience Card */}
-            <div className="lg:col-span-8">
-              {(() => {
-                const current = experiences[activeExp];
-                return (
-                  <div className="card-base p-6 sm:p-8 space-y-6 border-[#c88746]/30 shadow-xl shadow-[#c88746]/5">
-                    
-                    {/* Header Details */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border/70">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-2xl font-bold text-foreground">
-                            {current.position}
-                          </h3>
-                        </div>
-                        <p className="text-sm font-semibold text-[#c88746]">
-                          {current.company} <span className="text-muted-foreground font-normal">({current.client})</span>
-                        </p>
-                      </div>
-
-                      <div className="flex sm:flex-col sm:items-end gap-2 text-xs text-muted-foreground font-mono">
-                        <span className="inline-flex items-center gap-1.5">
-                          <CalendarDays className="w-3.5 h-3.5 text-[#c88746]" />
-                          {current.period}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-[#c88746]" />
-                          {current.location}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Summary */}
-                    <p className="text-sm text-foreground/90 leading-relaxed font-medium">
-                      {current.summary}
-                    </p>
-
-                    {/* Bullet Responsibilities */}
-                    <div className="space-y-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        {language === "id" ? "Cakupan & Tanggung Jawab Utama" : "Key Responsibilities & Deliverables"}
-                      </h4>
-                      <ul className="space-y-2.5">
-                        {current.responsibilities.map((r, i) => (
-                          <li key={i} className="flex items-start gap-3 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                            <CheckCircle2 className="w-4 h-4 text-[#c88746] flex-shrink-0 mt-0.5" />
-                            <span>{r}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Tech Tags */}
-                    <div className="pt-4 border-t border-border/60">
-                      <h4 className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground mb-2.5">
-                        Applied Technologies
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5">
-                        {current.tags.map((tag, i) => (
-                          <span
-                            key={i}
-                            className="px-3 py-1 rounded-lg border border-[#c88746]/30 bg-[#c88746]/10 text-xs font-mono font-semibold text-[#8a4b1f] dark:text-[#f0ca9f] shadow-xs"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
                   </div>
-                );
-              })()}
+
+                  <div className="flex sm:flex-col sm:items-end gap-2 text-xs font-mono text-muted-foreground flex-shrink-0">
+                    <span className="inline-flex items-center gap-1.5">
+                      <CalendarDays className="w-3.5 h-3.5 text-[#c88746]" />
+                      {currentExp.period}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-[#c88746]" />
+                      {currentExp.location}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Role Summary */}
+                <div className="py-5 relative z-10">
+                  <p className="text-sm sm:text-base text-foreground/90 leading-relaxed font-medium">
+                    {currentExp.summary}
+                  </p>
+                </div>
+
+                {/* Key Deliverables & Responsibilities */}
+                <div className="space-y-3 relative z-10">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#c88746]" />
+                    <span>
+                      {language === "id"
+                        ? "Tanggung Jawab & Kontribusi Kunci"
+                        : "Key Responsibilities & Deliverables"}
+                    </span>
+                  </h4>
+                  <ul className="space-y-2.5">
+                    {currentExp.responsibilities.map((r, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-3 text-xs sm:text-sm text-foreground/85 leading-relaxed"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-[#c88746] flex-shrink-0 mt-0.5" />
+                        <span>{r}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Applied Technologies Footer */}
+                <div className="pt-6 mt-6 border-t border-border/70 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                  <div className="space-y-2">
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground block font-bold">
+                      Applied Technologies:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {currentExp.tags.map((tag, i) => (
+                        <span
+                          key={i}
+                          className="px-2.5 py-1 rounded-lg border border-[#c88746]/30 bg-[#c88746]/[0.08] text-xs font-mono font-semibold text-[#8a4b1f] dark:text-[#f0ca9f]"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Vertical Progress Step Indicator */}
+                  <div className="flex items-center gap-2 self-start sm:self-auto">
+                    {experiences.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => goToSlide(idx)}
+                        aria-label={`Go to role ${idx + 1}`}
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          activeSlide === idx
+                            ? "w-7 bg-[#8a4b1f] dark:bg-[#d49b64]"
+                            : "w-2 bg-border hover:bg-[#c88746]/50"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+              </div>
             </div>
 
           </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { GraduationCap, Briefcase, Code2, Users, CheckCircle2, Award } from "lucide-react";
+import { Layers, Zap, Map, GitBranch, Sparkles } from "lucide-react";
 
 const useInView = (threshold = 0.15) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -22,139 +22,163 @@ const useInView = (threshold = 0.15) => {
   return { ref, inView };
 };
 
+interface PillarProps {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+}
+
+const PillarTiltCard = ({ pillar }: { pillar: PillarProps }) => {
+  const [tilt, setTilt] = useState({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    setTilt({
+      x: -(y / (rect.height / 2)) * 7,
+      y: (x / (rect.width / 2)) * 7,
+      glareX: ((e.clientX - rect.left) / rect.width) * 100,
+      glareY: ((e.clientY - rect.top) / rect.height) * 100,
+      opacity: 0.22,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
+  };
+
+  return (
+    <div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="p-5 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-sm hover:border-[#c88746]/60 hover:bg-card/95 transition-all duration-200 space-y-2.5 shadow-sm hover:shadow-lg hover:shadow-[#c88746]/10 relative overflow-hidden group cursor-pointer"
+      style={{
+        transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+      }}
+    >
+      {/* Specular glare */}
+      <div
+        className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(circle 220px at ${tilt.glareX}% ${tilt.glareY}%, rgba(200, 135, 70, ${tilt.opacity}), transparent 70%)`,
+        }}
+      />
+      <div className="w-10 h-10 rounded-xl bg-[#c88746]/10 border border-[#c88746]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+        {pillar.icon}
+      </div>
+      <h3 className="text-sm font-bold text-foreground group-hover:text-[#c88746] transition-colors">
+        {pillar.title}
+      </h3>
+      <p className="text-xs text-muted-foreground leading-relaxed">
+        {pillar.desc}
+      </p>
+    </div>
+  );
+};
+
 const AboutSection = () => {
   const { language } = useLanguage();
   const { ref, inView } = useInView();
 
-  const highlights = [
+  const engineeringPillars: PillarProps[] = [
     {
-      icon: <Briefcase className="w-5 h-5 text-[#c88746]" />,
-      title: language === "id" ? "4+ Tahun Pengalaman" : "4+ Years Experience",
+      icon: <Layers className="w-5 h-5 text-[#c88746]" />,
+      title: language === "id" ? "Arsitektur Komponen Skalabel" : "Scalable UI Architecture",
       desc:
         language === "id"
-          ? "Pengembangan sistem internal enterprise skala besar, jalan tol, dan platform e-commerce."
-          : "Enterprise toll operations, high-throughput e-commerce, and high-availability internal portals.",
+          ? "Sistem desain modular dan type-safe berbasis React & Next.js yang mudah dipelihara dan diskalakan."
+          : "Type-safe, modular UI components and design systems that scale predictably across enterprise codebases.",
     },
     {
-      icon: <Code2 className="w-5 h-5 text-[#c88746]" />,
-      title: language === "id" ? "Arsitektur Frontend" : "Frontend Architecture",
+      icon: <Zap className="w-5 h-5 text-[#c88746]" />,
+      title: language === "id" ? "Optimasi Performa & UX" : "Performance & Usability",
       desc:
         language === "id"
-          ? "Komponen reusable type-safe, modular state management, dan optimasi Core Web Vitals."
-          : "Type-safe reusable UI systems, modular state patterns, and sub-second Core Web Vitals tuning.",
+          ? "Rendering sub-detik, Core Web Vitals optimal, dan transisi responsif sesuai standar spesifikasi Figma."
+          : "Tuning sub-second page loads, Core Web Vitals, and pixel-precise responsive layouts directly from Figma.",
     },
     {
-      icon: <Users className="w-5 h-5 text-[#c88746]" />,
-      title: language === "id" ? "Kolaborasi Tim Lintas Fungsi" : "Cross-Functional Synergy",
+      icon: <Map className="w-5 h-5 text-[#c88746]" />,
+      title: language === "id" ? "Visualisasi Data Spasial & Real-Time" : "Spatial & Real-Time Data",
       desc:
         language === "id"
-          ? "Bekerja erat dengan Backend, System Analyst, UI/UX Designer, QA, dan DevOps."
-          : "Seamless collaboration with backend architects, QA engineers, product designers, and DevOps.",
+          ? "Integrasi peta interaktif Mapbox GL, layer vektor GeoJSON tol, dan dashboard operasional real-time."
+          : "Integrating interactive Mapbox GL GIS mapping, GeoJSON vector layers, and data-dense operational dashboards.",
     },
     {
-      icon: <GraduationCap className="w-5 h-5 text-[#c88746]" />,
-      title: language === "id" ? "S1 Sistem Informasi (Cum Laude)" : "B.Sc. Information Systems",
+      icon: <GitBranch className="w-5 h-5 text-[#c88746]" />,
+      title: language === "id" ? "Standar Produksi & CI/CD" : "Production Standards & CI/CD",
       desc:
         language === "id"
-          ? "Lulus dengan predikat Cum Laude (IPK 3.61/4.00) dengan fondasi rekayasa perangkat lunak yang kokoh."
-          : "Graduated with Cum Laude honors (3.61 / 4.00 GPA) providing deep software engineering rigor.",
+          ? "Kolaborasi Agile bersama tim Backend, QA, dan DevOps dengan deployment Jenkins, GitLab, serta OpenShift."
+          : "Collaborating across cross-functional Agile teams with automated Jenkins, GitLab CI, and OpenShift workflows.",
     },
   ];
 
-  const aboutParagraphs =
-    language === "id"
-      ? [
-          "Saya adalah Frontend Developer dengan lebih dari 4 tahun pengalaman merancang dan mengimplementasikan antarmuka web yang responsif, berpusat pada pengguna, dan berorientasi pada performa tinggi. Sepanjang karier saya, saya telah berkontribusi pada aplikasi skala enterprise — mulai dari portal internal manajemen jalan tol hingga sistem e-commerce dan dashboard analitik berbasis data.",
-          "Keahlian inti saya berakar kuat pada ekosistem React, Next.js, Vue.js, dan TypeScript. Saya terbiasa menerjemahkan arsitektur sistem dan desain Figma menjadi antarmuka yang presisi piksel, modular, dan mudah dipelihara. Saya juga memiliki rekam jejak dalam visualisasi geospasial menggunakan Mapbox GL serta integrasi data real-time.",
-          "Saya terbiasa bekerja dalam lingkungan profesional berbasis CI/CD (Jenkins, GitLab, OpenShift) dan metodologi Agile. Bagi saya, keunggulan frontend terletak pada kode yang bersih, performa yang ringan, dan kemudahan kolaborasi tim jangka panjang.",
-        ]
-      : [
-          "I am a Frontend Developer with 4+ years of hands-on experience architecting and shipping responsive, user-centric, high-performance web applications. My career spans enterprise-scale production systems — from mission-critical toll road operations and dynamic GIS mapping to nationwide e-commerce platforms and business analytics portals.",
-          "My technical core centers around React, Next.js, Vue.js, and TypeScript. I specialize in translating complex Figma specifications into pixel-perfect, highly maintainable, and accessible UI architectures. In addition, I bring proven experience in geospatial mapping with Mapbox GL and real-time REST/WebSocket data visualization.",
-          "I operate comfortably in collaborative DevOps-driven workflows using Jenkins, GitLab CI, and OpenShift clusters. I firmly believe senior engineering is about clean architecture, sub-second latency, and writing code that is a pleasure for teammates to maintain and scale.",
-        ];
-
   return (
-    <section id="about" className="py-24 relative" aria-label="About section">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="about" className="py-24 relative overflow-hidden" aria-label="About section">
+      {/* Dynamic Warm Ambient Glow */}
+      <div className="absolute top-1/2 left-10 w-[450px] h-[350px] bg-[#c88746]/10 rounded-full blur-[140px] pointer-events-none" />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div ref={ref} className="max-w-6xl mx-auto">
           
           {/* Section Header */}
           <div
-            className={`mb-14 transition-all duration-700 ${
+            className={`mb-12 transition-all duration-700 ${
               inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
             }`}
           >
             <span className="section-label mb-3">
-              {language === "id" ? "Tentang Saya" : "Professional Background"}
+              {language === "id" ? "Tentang Rekayasa" : "Engineering Background"}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground mt-2">
               {language === "id"
-                ? "Rekayasa Web Berbasis Dampak & Standar Kualitas Tinggi"
-                : "Engineering for Real-World Impact & Rigor"}
+                ? "Menghubungkan Desain Kompleks dengan Arsitektur Web yang Andal"
+                : "Bridging Complex Systems with Intuitive Web Interfaces"}
             </h2>
           </div>
 
-          <div className="grid lg:grid-cols-12 gap-10 items-start">
+          <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-start">
             
-            {/* Left Bio Content (7 cols) */}
+            {/* Left Bio Narrative (6 cols) */}
             <div
-              className={`lg:col-span-7 space-y-6 transition-all duration-700 delay-100 ${
+              className={`lg:col-span-6 space-y-5 transition-all duration-700 delay-100 ${
                 inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
               }`}
             >
-              {aboutParagraphs.map((p, i) => (
-                <p key={i} className="text-muted-foreground leading-relaxed text-sm sm:text-base">
-                  {p}
-                </p>
-              ))}
+              <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+                {language === "id"
+                  ? "Sebagai frontend engineer, fokus utama saya adalah merancang antarmuka web yang tidak hanya indah secara estetika, tetapi juga kokoh secara teknis. Saya memiliki pengalaman menangani aplikasi skala besar — mulai dari sistem pemantauan jalan tol internal bernavigasi geospasial hingga platform e-commerce dan dashboard operasional bisnis."
+                  : "As a frontend engineer, my priority is architecting web applications that are as technically sound as they are intuitive. My experience centers on building mission-critical enterprise applications — from real-time toll operations and interactive GIS mapping to high-throughput e-commerce storefronts and business administration CMS portals."}
+              </p>
 
-              {/* Quick Metrics Bar */}
-              <div className="pt-6 border-t border-border/80 grid grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl border border-border/80 bg-card/60 backdrop-blur-md">
-                  <div className="text-2xl sm:text-3xl font-extrabold text-gradient">4+</div>
-                  <div className="text-xs text-muted-foreground font-medium mt-1">
-                    {language === "id" ? "Tahun Pengalaman" : "Years Experience"}
-                  </div>
-                </div>
-                <div className="p-4 rounded-xl border border-border/80 bg-card/60 backdrop-blur-md">
-                  <div className="text-2xl sm:text-3xl font-extrabold text-gradient">10+</div>
-                  <div className="text-xs text-muted-foreground font-medium mt-1">
-                    {language === "id" ? "Proyek Terkirim" : "Shipped Projects"}
-                  </div>
-                </div>
-                <div className="p-4 rounded-xl border border-border/80 bg-card/60 backdrop-blur-md">
-                  <div className="text-2xl sm:text-3xl font-extrabold text-gradient">3.61</div>
-                  <div className="text-xs text-muted-foreground font-medium mt-1">
-                    Cum Laude GPA
-                  </div>
-                </div>
+              <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+                {language === "id"
+                  ? "Bekerja di lingkungan enterprise menuntut disiplin tinggi terhadap performa, keamanan tipe (TypeScript), dan integrasi data yang stabil. Saya percaya bahwa kode yang baik adalah kode yang modular, mudah diuji, dan menyenangkan untuk dipelihara bersama tim lintas fungsi."
+                  : "Operating within enterprise environments demands rigorous attention to runtime performance, strict TypeScript type safety, and resilient data contracts. I believe great engineering results in modular, testable code that empowers cross-functional teams to ship features with speed and confidence."}
+              </p>
+
+              {/* Quiet Professional Note */}
+              <div className="pt-4 border-t border-border/70 flex items-center gap-3 text-xs text-muted-foreground font-mono">
+                <span className="w-2 h-2 rounded-full bg-[#c88746] animate-pulse" />
+                <span>
+                  {language === "id"
+                    ? "Berfokus pada arsitektur bersih, performa web, dan kolaborasi tim yang solid."
+                    : "Focused on clean architecture, web performance, and reliable engineering collaboration."}
+                </span>
               </div>
             </div>
 
-            {/* Right Highlight Cards (5 cols) */}
+            {/* Right Pillars Grid with 3D Tilt (6 cols) */}
             <div
-              className={`lg:col-span-5 grid grid-cols-1 gap-4 transition-all duration-700 delay-200 ${
+              className={`lg:col-span-6 grid sm:grid-cols-2 gap-4 transition-all duration-700 delay-200 ${
                 inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
               }`}
             >
-              {highlights.map((h, i) => (
-                <div
-                  key={i}
-                  className="card-base p-5 flex gap-4 items-start group hover:border-[#c88746]/50 hover:shadow-lg hover:shadow-[#c88746]/5 transition-all duration-300"
-                >
-                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#c88746]/10 flex items-center justify-center border border-[#c88746]/20 group-hover:scale-105 transition-transform">
-                    {h.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground group-hover:text-[#c88746] transition-colors">
-                      {h.title}
-                    </h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-                      {h.desc}
-                    </p>
-                  </div>
-                </div>
+              {engineeringPillars.map((pillar, i) => (
+                <PillarTiltCard key={i} pillar={pillar} />
               ))}
             </div>
 

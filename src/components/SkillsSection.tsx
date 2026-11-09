@@ -1,290 +1,474 @@
 import React, { useState, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Search, CheckCircle2, Sparkles, Terminal, X } from "lucide-react";
+import {
+  Search,
+  Code2,
+  MapPin,
+  Database,
+  Palette,
+  GitBranch,
+  X,
+  CheckCircle2,
+  Sparkles,
+} from "lucide-react";
 
-interface SkillItem {
-  name: string;
+interface DomainGroup {
+  id: string;
   category: "frontend" | "ui" | "state" | "viz" | "devops";
-  categoryLabel: string;
-  highlight?: string;
-  colorClass: string;
+  title: string;
+  titleEn: string;
+  subtitle: string;
+  subtitleEn: string;
+  icon: React.ElementType;
+  accentColor: string;
+  featuredSkillCount: string;
+  skills: {
+    name: string;
+    highlight: string;
+    highlightEn: string;
+    level?: string;
+  }[];
 }
 
-const SkillsSection = () => {
+const DomainTiltCard: React.FC<{
+  domain: DomainGroup;
+  isHeroCard: boolean;
+  language: string;
+}> = ({ domain, isHeroCard, language }) => {
+  const [tilt, setTilt] = useState({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
+  const IconComponent = domain.icon;
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    setTilt({
+      x: -(y / (rect.height / 2)) * 6,
+      y: (x / (rect.width / 2)) * 6,
+      glareX: ((e.clientX - rect.left) / rect.width) * 100,
+      glareY: ((e.clientY - rect.top) / rect.height) * 100,
+      opacity: 0.2,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
+  };
+
+  return (
+    <div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className={`card-base p-6 sm:p-7 flex flex-col justify-between relative group hover:border-[#c88746]/60 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-[#c88746]/10 cursor-default ${
+        isHeroCard
+          ? "md:col-span-2 lg:col-span-2 border-[#c88746]/40 bg-gradient-to-br from-card via-card to-[#c88746]/[0.05]"
+          : "border-border/80"
+      }`}
+      style={{
+        transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+      }}
+    >
+      {/* Dynamic 3D Specular Glare */}
+      <div
+        className="absolute inset-0 pointer-events-none rounded-2xl transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(circle 260px at ${tilt.glareX}% ${tilt.glareY}%, rgba(200, 135, 70, ${tilt.opacity}), transparent 70%)`,
+        }}
+      />
+
+      {/* Subtle Top-Right Ambient Accent */}
+      <div className={`absolute top-0 right-0 w-36 h-36 bg-gradient-to-bl ${domain.accentColor} rounded-tr-2xl pointer-events-none rounded-bl-full`} />
+
+      <div>
+        {/* Domain Header */}
+        <div className="flex items-start justify-between gap-4 mb-3 relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-[#c88746]/10 border border-[#c88746]/30 flex items-center justify-center text-[#8a4b1f] dark:text-[#f0ca9f] group-hover:scale-105 transition-transform shadow-2xs">
+              <IconComponent className="w-5 h-5 text-[#c88746]" />
+            </div>
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#8a4b1f] dark:text-[#f0ca9f] font-bold">
+                {domain.featuredSkillCount}
+              </span>
+              <h3 className="text-lg sm:text-xl font-extrabold text-foreground leading-snug">
+                {language === "id" ? domain.title : domain.titleEn}
+              </h3>
+            </div>
+          </div>
+        </div>
+
+        {/* Domain Subtitle */}
+        <p className="text-xs text-muted-foreground leading-relaxed mb-5 relative z-10">
+          {language === "id" ? domain.subtitle : domain.subtitleEn}
+        </p>
+
+        {/* Interactive Skills Grid (Compact, Clean Pills) */}
+        <div className={`grid gap-2 relative z-10 ${isHeroCard ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"}`}>
+          {domain.skills.map((skill, sIdx) => (
+            <div
+              key={sIdx}
+              className="p-2.5 px-3 rounded-xl border border-border/70 bg-muted/20 hover:bg-muted/50 hover:border-[#c88746]/50 hover:scale-[1.01] transition-all flex items-center justify-between gap-2.5 group/chip shadow-2xs"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#c88746] opacity-70 group-hover/chip:opacity-100 group-hover/chip:scale-125 transition-all flex-shrink-0" />
+                <span className="font-bold text-xs text-foreground group-hover/chip:text-[#c88746] transition-colors truncate">
+                  {skill.name}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono text-muted-foreground px-2 py-0.5 rounded bg-card/80 border border-border/70 flex-shrink-0 truncate max-w-[170px]">
+                {language === "id" ? skill.highlight : skill.highlightEn}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Footnote */}
+      <div className="mt-5 pt-3.5 border-t border-border/60 flex items-center justify-between text-[10px] font-mono text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          Production Proven
+        </span>
+        <span className="text-muted-foreground/80">
+          {domain.skills.length} Technologies
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export const SkillsSection = () => {
   const { language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<string>("all");
 
-  const skillList: SkillItem[] = useMemo(
+  // 5 High-Impact Engineering Domains
+  const domainGroups: DomainGroup[] = useMemo(
     () => [
-      // Frontend Core
       {
-        name: "React.js",
+        id: "frontend-architecture",
         category: "frontend",
-        categoryLabel: "Frontend Core",
-        highlight: "Primary Library (4+ yrs)",
-        colorClass: "border-cyan-500/40 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
+        title: "Arsitektur Frontend & Framework Modern",
+        titleEn: "Frontend Architecture & Modern Frameworks",
+        subtitle:
+          "Pembangunan aplikasi berbasis komponen, SSR/SSG, dan strict type-safety untuk skalabilitas jangka panjang.",
+        subtitleEn:
+          "Component-driven systems, SSR/SSG workflows, and strict type-safety engineered for long-term scalability.",
+        icon: Code2,
+        accentColor: "from-[#8a4b1f]/20 via-[#c88746]/10 to-transparent",
+        featuredSkillCount: "7 Core Technologies",
+        skills: [
+          {
+            name: "React.js",
+            highlight: "Primary (4+ Thn)",
+            highlightEn: "Primary (4+ Yrs)",
+            level: "Core Expert",
+          },
+          {
+            name: "Next.js",
+            highlight: "App Router, SSR/SSG",
+            highlightEn: "App Router, SSR/SSG",
+            level: "Production",
+          },
+          {
+            name: "TypeScript",
+            highlight: "Strict Types & Interfaces",
+            highlightEn: "Strict Type Safety",
+            level: "Standard",
+          },
+          {
+            name: "Vue.js",
+            highlight: "Composition & Options API",
+            highlightEn: "Composition API",
+            level: "Production",
+          },
+          {
+            name: "JavaScript (ES6+)",
+            highlight: "Async, Closures, DOM",
+            highlightEn: "Async/Await Core",
+            level: "Foundation",
+          },
+          {
+            name: "Nuxt.js",
+            highlight: "Vue SSR Engine",
+            highlightEn: "Vue SSR Framework",
+            level: "Production",
+          },
+          {
+            name: "HTML5 & Semantic Web",
+            highlight: "W3C Standards & A11y",
+            highlightEn: "W3C Standards & A11y",
+            level: "Foundation",
+          },
+        ],
       },
       {
-        name: "Next.js",
-        category: "frontend",
-        categoryLabel: "Frontend Core",
-        highlight: "App Router, SSR & SSG",
-        colorClass: "border-zinc-400/40 bg-zinc-500/10 text-foreground",
-      },
-      {
-        name: "Vue.js",
-        category: "frontend",
-        categoryLabel: "Frontend Core",
-        highlight: "Composition & Options API",
-        colorClass: "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-      },
-      {
-        name: "Nuxt.js",
-        category: "frontend",
-        categoryLabel: "Frontend Core",
-        highlight: "Vue SSR Framework",
-        colorClass: "border-teal-500/40 bg-teal-500/10 text-teal-600 dark:text-teal-400",
-      },
-      {
-        name: "TypeScript",
-        category: "frontend",
-        categoryLabel: "Frontend Core",
-        highlight: "Strict Type Safety",
-        colorClass: "border-blue-500/40 bg-blue-500/10 text-blue-600 dark:text-blue-400",
-      },
-      {
-        name: "JavaScript (ES6+)",
-        category: "frontend",
-        categoryLabel: "Frontend Core",
-        highlight: "Modern Asynchronous JS",
-        colorClass: "border-amber-400/40 bg-amber-400/10 text-amber-600 dark:text-amber-400",
-      },
-      {
-        name: "HTML5 & Semantic Web",
-        category: "frontend",
-        categoryLabel: "Frontend Core",
-        highlight: "W3C Standards & SEO",
-        colorClass: "border-orange-500/40 bg-orange-500/10 text-orange-600 dark:text-orange-400",
-      },
-      {
-        name: "CSS3 & Modern Layouts",
-        category: "frontend",
-        categoryLabel: "Frontend Core",
-        highlight: "Flexbox, Grid & Animations",
-        colorClass: "border-indigo-400/40 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
-      },
-      {
-        name: "Tailwind CSS",
-        category: "frontend",
-        categoryLabel: "Frontend Core",
-        highlight: "Design Tokens & JIT",
-        colorClass: "border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400",
-      },
-
-      // UI Libraries
-      {
-        name: "Material UI (MUI)",
-        category: "ui",
-        categoryLabel: "UI & Component Libraries",
-        highlight: "Enterprise Theming",
-        colorClass: "border-blue-600/40 bg-blue-600/10 text-blue-600 dark:text-blue-400",
-      },
-      {
-        name: "Ant Design",
-        category: "ui",
-        categoryLabel: "UI & Component Libraries",
-        highlight: "Admin CMS Dashboards",
-        colorClass: "border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-400",
-      },
-      {
-        name: "Mantine",
-        category: "ui",
-        categoryLabel: "UI & Component Libraries",
-        highlight: "Accessible Component Hooks",
-        colorClass: "border-blue-400/40 bg-blue-400/10 text-blue-500",
-      },
-      {
-        name: "Vuetify",
-        category: "ui",
-        categoryLabel: "UI & Component Libraries",
-        highlight: "Material Design Framework",
-        colorClass: "border-cyan-600/40 bg-cyan-600/10 text-cyan-600 dark:text-cyan-400",
-      },
-
-      // State & Data
-      {
-        name: "Redux & Redux Toolkit",
-        category: "state",
-        categoryLabel: "State & Data",
-        highlight: "Predictable Global Store",
-        colorClass: "border-purple-500/40 bg-purple-500/10 text-purple-600 dark:text-purple-400",
-      },
-      {
-        name: "Vuex",
-        category: "state",
-        categoryLabel: "State & Data",
-        highlight: "Centralized Vue State",
-        colorClass: "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-      },
-      {
-        name: "REST API Integration",
-        category: "state",
-        categoryLabel: "State & Data",
-        highlight: "CRUD & Webhook Handling",
-        colorClass: "border-green-600/40 bg-green-600/10 text-green-600 dark:text-green-400",
-      },
-      {
-        name: "Axios",
-        category: "state",
-        categoryLabel: "State & Data",
-        highlight: "Interceptors & Token Auth",
-        colorClass: "border-purple-400/40 bg-purple-400/10 text-purple-500",
-      },
-      {
-        name: "TanStack Query",
-        category: "state",
-        categoryLabel: "State & Data",
-        highlight: "Server-State Caching",
-        colorClass: "border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-400",
-      },
-
-      // Visualization & Mapping
-      {
-        name: "Mapbox GL",
+        id: "geospatial-viz",
         category: "viz",
-        categoryLabel: "Visualization & Mapping",
-        highlight: "Interactive GIS & Toll Layers",
-        colorClass: "border-teal-500/40 bg-teal-500/10 text-teal-600 dark:text-teal-400",
+        title: "Sistem GIS Geospasial & Visualisasi Data",
+        titleEn: "Geospatial GIS & Real-Time Visualization",
+        subtitle:
+          "Visualisasi peta jaringan jalan tol Jasa Marga real-time dan dashboard metrik analitik latensi rendah.",
+        subtitleEn:
+          "Real-time toll road GIS mapping and low-latency operational telemetry dashboards for high data throughput.",
+        icon: MapPin,
+        accentColor: "from-teal-500/15 via-emerald-500/5 to-transparent",
+        featuredSkillCount: "Mission-Critical GIS",
+        skills: [
+          {
+            name: "Mapbox GL JS",
+            highlight: "Layer Vektor Tol",
+            highlightEn: "Toll Vector Tiles",
+            level: "Specialty",
+          },
+          {
+            name: "Leaflet",
+            highlight: "Peta Spasial Ringan",
+            highlightEn: "Lightweight Spatial",
+            level: "Production",
+          },
+          {
+            name: "Chart.js",
+            highlight: "Metrik Transaksi Live",
+            highlightEn: "Real-time Telemetry",
+            level: "Production",
+          },
+          {
+            name: "Power BI Integration",
+            highlight: "Embedded Dashboard",
+            highlightEn: "Embedded Dashboards",
+            level: "Enterprise",
+          },
+        ],
       },
       {
-        name: "Leaflet",
-        category: "viz",
-        categoryLabel: "Visualization & Mapping",
-        highlight: "Lightweight Spatial Maps",
-        colorClass: "border-lime-500/40 bg-lime-500/10 text-lime-600 dark:text-lime-400",
+        id: "state-data",
+        category: "state",
+        title: "Arsitektur State & Alur Data Asinkron",
+        titleEn: "State Management & Data Pipelines",
+        subtitle:
+          "Pengelolaan server-state, caching terdistribusi, sinkronisasi REST API, dan integritas transaksi.",
+        subtitleEn:
+          "Server-state caching, distributed cache invalidation, REST API synchronization, and transaction integrity.",
+        icon: Database,
+        accentColor: "from-amber-500/15 via-[#c88746]/5 to-transparent",
+        featuredSkillCount: "Data Consistency",
+        skills: [
+          {
+            name: "TanStack Query",
+            highlight: "Server-State Caching",
+            highlightEn: "Server-State Caching",
+            level: "Modern Core",
+          },
+          {
+            name: "Redux & Redux Toolkit",
+            highlight: "Central Store & Slices",
+            highlightEn: "Central Store & Slices",
+            level: "Enterprise",
+          },
+          {
+            name: "Vuex",
+            highlight: "Vue Platform State",
+            highlightEn: "Vue Platform State",
+            level: "Production",
+          },
+          {
+            name: "REST API Integration",
+            highlight: "CRUD & Webhooks",
+            highlightEn: "CRUD & Webhooks",
+            level: "Core",
+          },
+          {
+            name: "Axios",
+            highlight: "Interceptors & Auth",
+            highlightEn: "Interceptors & Auth",
+            level: "Core",
+          },
+        ],
       },
       {
-        name: "Power BI Integration",
-        category: "viz",
-        categoryLabel: "Visualization & Mapping",
-        highlight: "Executive Analytics Dashboards",
-        colorClass: "border-yellow-500/40 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+        id: "ui-design-systems",
+        category: "ui",
+        title: "Design Systems & UI Engineering",
+        titleEn: "Design Systems & UI Engineering",
+        subtitle:
+          "Penerjemahan Figma presisi tinggi ke komponen modular, responsif, dan standar aksesibilitas enterprise.",
+        subtitleEn:
+          "High-fidelity Figma translation into accessible, responsive, and tokenized design systems.",
+        icon: Palette,
+        accentColor: "from-blue-500/15 via-indigo-500/5 to-transparent",
+        featuredSkillCount: "Design Tokens",
+        skills: [
+          {
+            name: "Tailwind CSS",
+            highlight: "Tokens & JIT Config",
+            highlightEn: "Tokens & JIT Config",
+            level: "Primary",
+          },
+          {
+            name: "Material UI (MUI)",
+            highlight: "Enterprise Theming",
+            highlightEn: "Enterprise Theming",
+            level: "Enterprise",
+          },
+          {
+            name: "Ant Design",
+            highlight: "Admin CMS Dashboards",
+            highlightEn: "Admin CMS Dashboards",
+            level: "Production",
+          },
+          {
+            name: "Mantine",
+            highlight: "Accessible Component Hooks",
+            highlightEn: "Accessible Hooks",
+            level: "Production",
+          },
+          {
+            name: "Vuetify",
+            highlight: "Vue Material Design",
+            highlightEn: "Vue Material Design",
+            level: "Production",
+          },
+        ],
       },
       {
-        name: "Chart.js",
-        category: "viz",
-        categoryLabel: "Visualization & Mapping",
-        highlight: "Real-time Metrics Visuals",
-        colorClass: "border-pink-500/40 bg-pink-500/10 text-pink-600 dark:text-pink-400",
-      },
-
-      // Development & Tools
-      {
-        name: "Git",
+        id: "devops-tooling",
         category: "devops",
-        categoryLabel: "Tools & DevOps",
-        highlight: "Branching & Code Integrity",
-        colorClass: "border-orange-600/40 bg-orange-600/10 text-orange-600 dark:text-orange-400",
-      },
-      {
-        name: "GitLab",
-        category: "devops",
-        categoryLabel: "Tools & DevOps",
-        highlight: "Merge Requests & CI/CD",
-        colorClass: "border-orange-500/40 bg-orange-500/10 text-orange-500",
-      },
-      {
-        name: "Bitbucket",
-        category: "devops",
-        categoryLabel: "Tools & DevOps",
-        highlight: "Enterprise Code Hosting",
-        colorClass: "border-blue-500/40 bg-blue-500/10 text-blue-600 dark:text-blue-400",
-      },
-      {
-        name: "Jenkins",
-        category: "devops",
-        categoryLabel: "Tools & DevOps",
-        highlight: "Automated Build Pipelines",
-        colorClass: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
-      },
-      {
-        name: "Docker",
-        category: "devops",
-        categoryLabel: "Tools & DevOps",
-        highlight: "Containerized Workflows",
-        colorClass: "border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400",
-      },
-      {
-        name: "OpenShift",
-        category: "devops",
-        categoryLabel: "Tools & DevOps",
-        highlight: "Kubernetes Cluster Deployment",
-        colorClass: "border-red-600/40 bg-red-600/10 text-red-600 dark:text-red-400",
-      },
-      {
-        name: "Figma",
-        category: "devops",
-        categoryLabel: "Tools & DevOps",
-        highlight: "Pixel-Perfect Implementation",
-        colorClass: "border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400",
+        title: "CI/CD, Cloud & Tooling Produksi",
+        titleEn: "CI/CD, Cloud & Enterprise Tooling",
+        subtitle:
+          "Otomatisasi build, deployment klaster kontainer, kontrol versi terstruktur, dan workflow kolaboratif.",
+        subtitleEn:
+          "Automated builds, containerized cluster deployments, version integrity, and agile DevOps workflows.",
+        icon: GitBranch,
+        accentColor: "from-orange-500/15 via-red-500/5 to-transparent",
+        featuredSkillCount: "Deployment Rigor",
+        skills: [
+          {
+            name: "GitLab CI/CD",
+            highlight: "Automated Build Pipeline",
+            highlightEn: "Automated Testing",
+            level: "Enterprise",
+          },
+          {
+            name: "Jenkins",
+            highlight: "Build & Deploy Otomatis",
+            highlightEn: "Automated Pipelines",
+            level: "Enterprise",
+          },
+          {
+            name: "Red Hat OpenShift",
+            highlight: "Klaster Kubernetes",
+            highlightEn: "Kubernetes Enterprise",
+            level: "Enterprise",
+          },
+          {
+            name: "Docker",
+            highlight: "Containerized Runtime",
+            highlightEn: "Container Environments",
+            level: "Production",
+          },
+          {
+            name: "Git & Bitbucket",
+            highlight: "Branching Strategy",
+            highlightEn: "Branching Integrity",
+            level: "Core",
+          },
+          {
+            name: "Figma",
+            highlight: "Tokens & Hand-off",
+            highlightEn: "Tokens & Hand-off",
+            level: "Design Core",
+          },
+        ],
       },
     ],
     []
   );
 
-  const categories = [
-    { id: "all", label: language === "id" ? "Semua Keahlian" : "All Skills" },
+  // Flat skills list for quick text search
+  const allFlatSkills = useMemo(() => {
+    const list: Array<{ name: string; category: string; categoryLabel: string; highlight: string }> = [];
+    domainGroups.forEach((group) => {
+      group.skills.forEach((skill) => {
+        list.push({
+          name: skill.name,
+          category: group.category,
+          categoryLabel: language === "id" ? group.title : group.titleEn,
+          highlight: language === "id" ? skill.highlight : skill.highlightEn,
+        });
+      });
+    });
+    return list;
+  }, [domainGroups, language]);
+
+  // Filtered domains based on tab
+  const filteredDomains = useMemo(() => {
+    if (activeTab === "all") return domainGroups;
+    return domainGroups.filter((g) => g.category === activeTab);
+  }, [domainGroups, activeTab]);
+
+  // Search results
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return null;
+    const q = searchQuery.toLowerCase();
+    return allFlatSkills.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.categoryLabel.toLowerCase().includes(q) ||
+        (s.highlight && s.highlight.toLowerCase().includes(q))
+    );
+  }, [allFlatSkills, searchQuery]);
+
+  const categoryTabs = [
+    { id: "all", label: language === "id" ? "Semua Domain" : "All Domains" },
     { id: "frontend", label: "Frontend Core" },
-    { id: "ui", label: "UI Libraries" },
+    { id: "viz", label: "GIS & Spatial" },
     { id: "state", label: "State & Data" },
-    { id: "viz", label: "GIS & Charts" },
-    { id: "devops", label: "Tools & DevOps" },
+    { id: "ui", label: "Design Systems" },
+    { id: "devops", label: "CI/CD & Cloud" },
   ];
 
-  const filteredSkills = useMemo(() => {
-    return skillList.filter((s) => {
-      const matchCat = activeCategory === "all" || s.category === activeCategory;
-      const matchSearch =
-        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.categoryLabel.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (s.highlight && s.highlight.toLowerCase().includes(searchQuery.toLowerCase()));
-      return matchCat && matchSearch;
-    });
-  }, [skillList, activeCategory, searchQuery]);
-
   return (
-    <section id="skills" className="py-24 relative" aria-label="Technical skills">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="skills" className="py-24 relative overflow-hidden" aria-label="Technical skills and architecture">
+      {/* Dynamic Warm Ambient Glow */}
+      <div className="absolute top-1/3 right-10 w-[500px] h-[450px] bg-[#c88746]/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-[450px] h-[350px] bg-[#8a4b1f]/10 rounded-full blur-[130px] pointer-events-none" />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-6xl mx-auto">
           
-          {/* Section Header */}
+          {/* Header & Search */}
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
             <div>
-              <span className="section-label mb-3">
-                {language === "id" ? "Keahlian Teknis" : "Technical Stack"}
+              <span className="section-label mb-2 inline-block">
+                {language === "id" ? "Keahlian Arsitektur & Teknologi" : "Engineering Architecture & Stack"}
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground mt-2">
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
                 {language === "id"
-                  ? "Teknologi & Ekosistem Rekayasa"
+                  ? "Pilar Teknologi & Ekosistem Rekayasa"
                   : "Core Technologies & Tooling"}
               </h2>
               <p className="text-muted-foreground mt-2 max-w-xl text-sm sm:text-base">
                 {language === "id"
-                  ? "Daftar teknologi yang digunakan secara aktif dalam proyek produksi dan lingkungan enterprise."
-                  : "Technologies actively utilized across production environments, toll operations, and distributed web platforms."}
+                  ? "Penguasaan teknologi modern yang teruji pada sistem pemantauan tol nasional Jasa Marga, GIS geospasial, dan portal enterprise berkinerja tinggi."
+                  : "Production-tested technologies across national toll operations at Jasa Marga, GIS spatial mapping, and high-performance enterprise portals."}
               </p>
             </div>
 
-            {/* Interactive Search Bar */}
-            <div className="relative w-full md:w-72">
+            {/* Instant Filter Search Bar */}
+            <div className="relative w-full md:w-80">
               <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={language === "id" ? "Filter stack (e.g. Next, Mapbox)..." : "Filter stack (e.g. Next, Mapbox)..."}
-                className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-border/80 bg-card text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#c88746]/50 shadow-sm"
+                placeholder={
+                  language === "id"
+                    ? "Cari stack (misal: Next, Mapbox, OpenShift)..."
+                    : "Search stack (e.g. Next, Mapbox, OpenShift)..."
+                }
+                className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-border/80 bg-card text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#c88746]/50 shadow-xs"
               />
               {searchQuery && (
                 <button
@@ -298,59 +482,87 @@ const SkillsSection = () => {
             </div>
           </div>
 
-          {/* Category Tabs */}
-          <div className="flex flex-wrap items-center gap-2 mb-10 pb-4 border-b border-border/60">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                  activeCategory === cat.id
-                    ? "bg-[#8a4b1f] dark:bg-[#d49b64] text-white dark:text-[#181310] shadow-sm"
-                    : "border border-border/80 bg-card text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
+          {/* Domain Tabs (Visible when not actively searching) */}
+          {!searchResults && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 border-b border-border/60 scrollbar-none">
+              {categoryTabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-semibold font-mono transition-all ${
+                      isActive
+                        ? "bg-[#8a4b1f] dark:bg-[#d49b64] text-white dark:text-[#181310] shadow-md shadow-[#c88746]/20 scale-[1.02]"
+                        : "border border-border/80 bg-card/70 text-muted-foreground hover:text-foreground hover:border-border"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
-          {/* Skills Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredSkills.map((skill, index) => (
-              <div
-                key={index}
-                className="card-base p-4 flex flex-col justify-between group hover:border-[#c88746]/60 hover:shadow-lg transition-all"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground font-semibold">
-                      {skill.categoryLabel}
-                    </span>
-                    <span className={`w-2 h-2 rounded-full ${skill.colorClass.split(" ")[1]}`} />
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-sm text-foreground group-hover:text-[#c88746] transition-colors">
-                      {skill.name}
-                    </h3>
-                  </div>
-                </div>
-
-                {skill.highlight && (
-                  <div className="mt-3 pt-2.5 border-t border-border/50">
-                    <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-mono border ${skill.colorClass}`}>
-                      {skill.highlight}
-                    </span>
-                  </div>
-                )}
+          {/* Search Results View */}
+          {searchResults && (
+            <div className="space-y-4 animate-fade-in">
+              <div className="flex items-center justify-between text-xs font-mono text-muted-foreground pb-2">
+                <span>
+                  {language === "id" ? "Hasil pencarian untuk:" : "Search results for:"}{" "}
+                  <strong className="text-foreground">"{searchQuery}"</strong> ({searchResults.length})
+                </span>
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="text-[#8a4b1f] dark:text-[#f0ca9f] hover:underline"
+                >
+                  {language === "id" ? "Reset pencarian" : "Clear filter"}
+                </button>
               </div>
-            ))}
-          </div>
 
-          {filteredSkills.length === 0 && (
-            <div className="text-center py-16 text-muted-foreground text-sm">
-              No matching technologies found for "{searchQuery}".
+              {searchResults.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {searchResults.map((skill, idx) => (
+                    <div
+                      key={idx}
+                      className="card-base p-4 border-[#c88746]/30 hover:border-[#c88746]/60 transition-all flex flex-col justify-between"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider font-semibold">
+                          {skill.categoryLabel}
+                        </span>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                      </div>
+                      <h4 className="font-bold text-base text-foreground mb-1">
+                        {skill.name}
+                      </h4>
+                      <p className="text-xs text-[#8a4b1f] dark:text-[#f0ca9f] font-mono mt-1">
+                        {skill.highlight}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16 card-base text-muted-foreground text-xs font-mono">
+                  {language === "id"
+                    ? `Tidak ada teknologi yang cocok dengan kata kunci "${searchQuery}".`
+                    : `No technologies found matching "${searchQuery}".`}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Domain Bento Grid with 3D Tilt */}
+          {!searchResults && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredDomains.map((domain) => (
+                <DomainTiltCard
+                  key={domain.id}
+                  domain={domain}
+                  isHeroCard={domain.id === "frontend-architecture"}
+                  language={language}
+                />
+              ))}
             </div>
           )}
 

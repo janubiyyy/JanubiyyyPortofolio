@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   ExternalLink,
-  Sparkles,
   Info,
   X,
   CheckCircle2,
@@ -9,13 +8,8 @@ import {
   ChevronRight,
   ShieldCheck,
   Maximize2,
-  Play,
-  Pause,
-  Rotate3d,
-  Layers,
-  Compass,
-  Laptop,
-  Check,
+  Lock,
+  ArrowRight,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -49,7 +43,6 @@ export const ProjectsSection = () => {
   const [activeModalProject, setActiveModalProject] = useState<Project | null>(null);
 
   // 3D Tilt State for Main Viewport
-  const [tiltMode, setTiltMode] = useState<"interactive" | "isometric" | "flat">("interactive");
   const [tilt, setTilt] = useState<{ x: number; y: number; glareX: number; glareY: number; opacity: number }>({
     x: 0,
     y: 0,
@@ -58,15 +51,6 @@ export const ProjectsSection = () => {
     opacity: 0,
   });
   const [isTransitioning, setIsTransitioning] = useState(false);
-
-  // Autoplay State
-  const [isAutoplay, setIsAutoplay] = useState(false);
-  const [autoplayProgress, setAutoplayProgress] = useState(0);
-
-  // Drag state for bottom coverflow
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const coverflowRef = useRef<HTMLDivElement>(null);
 
   const projects: Project[] = useMemo(
     () => [
@@ -428,27 +412,6 @@ export const ProjectsSection = () => {
     switchSlide((activeSlide - 1 + projects.length) % projects.length);
   }, [activeSlide, projects.length, switchSlide]);
 
-  // Autoplay loop with smooth 100ms interval for progress bar
-  useEffect(() => {
-    if (!isAutoplay) {
-      setAutoplayProgress(0);
-      return;
-    }
-
-    const interval = 60; // 60ms tick for 5000ms duration = ~83 steps
-    const timer = setInterval(() => {
-      setAutoplayProgress((prev) => {
-        if (prev >= 100) {
-          nextSlide();
-          return 0;
-        }
-        return prev + 1.2;
-      });
-    }, interval);
-
-    return () => clearInterval(timer);
-  }, [isAutoplay, nextSlide]);
-
   // Keyboard navigation for slides
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -462,153 +425,62 @@ export const ProjectsSection = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [nextSlide, prevSlide]);
 
-  // 3D Mouse Parallax calculation
+  // Subtle 3D Mouse Parallax calculation
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (tiltMode === "flat") return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const maxDegree = tiltMode === "isometric" ? 18 : 12;
+    const maxDegree = 6;
     const rotateY = ((x - centerX) / centerX) * maxDegree;
     const rotateX = -((y - centerY) / centerY) * maxDegree;
-
-    const glareX = (x / rect.width) * 100;
-    const glareY = (y / rect.height) * 100;
 
     setTilt({
       x: rotateX,
       y: rotateY,
-      glareX,
-      glareY,
-      opacity: 0.35,
+      glareX: (x / rect.width) * 100,
+      glareY: (y / rect.height) * 100,
+      opacity: 0.15,
     });
   };
 
   const handleMouseLeave = () => {
-    if (tiltMode === "isometric") {
-      setTilt({ x: 10, y: -14, glareX: 30, glareY: 20, opacity: 0.2 });
-    } else {
-      setTilt({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
-    }
-  };
-
-  // Get current 3D transform style for device chassis
-  const getDeviceTransform = () => {
-    if (tiltMode === "isometric") {
-      return `perspective(1200px) rotateX(${10 + tilt.x * 0.4}deg) rotateY(${-14 + tilt.y * 0.4}deg) rotateZ(1.5deg) scale3d(1.02, 1.02, 1.02)`;
-    }
-    if (tiltMode === "flat") {
-      return "perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
-    }
-    return `perspective(1200px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(1.015, 1.015, 1.015)`;
+    setTilt({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
   };
 
   return (
     <section id="projects" className="py-24 relative overflow-hidden" aria-label="Featured projects showcase">
-      {/* Dynamic Warm Ambient 3D Glows */}
-      <div className="absolute top-1/4 left-1/5 w-[650px] h-[550px] bg-[#c88746]/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-1/5 w-[550px] h-[450px] bg-[#8a4b1f]/10 rounded-full blur-[130px] pointer-events-none" />
+      {/* Dynamic Warm Ambient Glows */}
+      <div className="absolute top-1/4 left-1/5 w-[500px] h-[400px] bg-[#c88746]/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 right-1/5 w-[450px] h-[350px] bg-[#8a4b1f]/10 rounded-full blur-[130px] pointer-events-none" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-6xl mx-auto">
           
-          {/* Header & 3D Interactive Control Bar */}
+          {/* Header & Slide Controls */}
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
             <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="section-label">
-                  {language === "id" ? "Koleksi Proyek Produksi" : "Production Systems Showcase"}
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  3D Interactive Engine
-                </span>
-              </div>
+              <span className="section-label mb-2 inline-block">
+                {language === "id" ? "Proyek Rekayasa Unggulan" : "Featured Production Projects"}
+              </span>
               <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
                 {language === "id"
-                  ? "Studi Kasus Rekayasa Frontend 3D"
-                  : "Interactive 3D Engineering Showcase"}
+                  ? "Sistem Enterprise & Aplikasi Web Produksi"
+                  : "Production-Grade Systems & Portals"}
               </h2>
               <p className="text-muted-foreground mt-2 max-w-xl text-sm sm:text-base">
                 {language === "id"
-                  ? "Arahkan kursor untuk merasakan kedalaman 3D paralaks. Jelajahi sistem tol Jasa Marga, peta geospasial Mapbox, dan platform e-commerce enterprise."
-                  : "Hover over the device to trigger dynamic 3D tilt and specular lighting. Inspect mission-critical toll systems and Mapbox GIS portals."}
+                  ? "Sistem operasional tol skala nasional di Jasa Marga, visualisasi peta spasial Mapbox GL, dan platform e-commerce berkinerja tinggi."
+                  : "Enterprise toll operations at Jasa Marga, Mapbox GL geospatial mapping, and high-performance e-commerce platforms."}
               </p>
             </div>
 
-            {/* 3D Mode & Navigation Controls */}
-            <div className="flex flex-wrap items-center gap-2.5">
-              
-              {/* 3D Perspective Mode Selector */}
-              <div className="flex items-center bg-card p-1 rounded-xl border border-border/80 shadow-sm">
-                <button
-                  onClick={() => {
-                    setTiltMode("interactive");
-                    setTilt({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
-                  }}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold font-mono transition-all ${
-                    tiltMode === "interactive"
-                      ? "bg-[#8a4b1f] dark:bg-[#d49b64] text-white dark:text-[#181310] shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  title="Interactive mouse-following 3D tilt"
-                >
-                  <Rotate3d className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">3D Tilt</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setTiltMode("isometric");
-                    setTilt({ x: 10, y: -14, glareX: 30, glareY: 20, opacity: 0.2 });
-                  }}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold font-mono transition-all ${
-                    tiltMode === "isometric"
-                      ? "bg-[#8a4b1f] dark:bg-[#d49b64] text-white dark:text-[#181310] shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  title="Fixed 3D Isometric View with floating layers"
-                >
-                  <Compass className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Isometric</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setTiltMode("flat");
-                    setTilt({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
-                  }}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold font-mono transition-all ${
-                    tiltMode === "flat"
-                      ? "bg-[#8a4b1f] dark:bg-[#d49b64] text-white dark:text-[#181310] shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  title="Flat 2D View"
-                >
-                  <Laptop className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Flat</span>
-                </button>
-              </div>
-
-              {/* Autoplay Toggle Button */}
-              <button
-                onClick={() => setIsAutoplay(!isAutoplay)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-semibold border transition-all ${
-                  isAutoplay
-                    ? "border-[#c88746] bg-[#c88746]/10 text-[#8a4b1f] dark:text-[#f0ca9f]"
-                    : "border-border/80 bg-card text-muted-foreground hover:text-foreground"
-                }`}
-                title={isAutoplay ? "Pause Autoplay" : "Enable Auto 3D Slide Carousel"}
-              >
-                {isAutoplay ? <Pause className="w-3.5 h-3.5 animate-pulse" /> : <Play className="w-3.5 h-3.5" />}
-                <span className="hidden sm:inline">{isAutoplay ? "Auto: ON" : "Auto"}</span>
-              </button>
-
-              {/* Slide Counter */}
-              <div className="flex items-center gap-1.5 font-mono text-sm px-3.5 py-2 rounded-xl border border-border/80 bg-card">
+            {/* Slide Navigation Controls */}
+            <div className="flex items-center gap-3">
+              {/* Counter */}
+              <div className="flex items-center gap-1.5 font-mono text-sm px-3.5 py-2 rounded-xl border border-border/80 bg-card shadow-xs">
                 <span className="font-bold text-[#8a4b1f] dark:text-[#f0ca9f] text-base">
                   {currentProject.number}
                 </span>
@@ -618,12 +490,12 @@ export const ProjectsSection = () => {
                 </span>
               </div>
 
-              {/* Prev & Next Arrows */}
-              <div className="flex items-center gap-1 bg-card p-1 rounded-xl border border-border/80">
+              {/* Prev & Next Buttons */}
+              <div className="flex items-center gap-1 bg-card p-1 rounded-xl border border-border/80 shadow-xs">
                 <button
                   onClick={prevSlide}
                   className="p-2 rounded-lg text-foreground hover:bg-[#c88746]/10 hover:text-[#c88746] transition-colors"
-                  aria-label="Previous project (←)"
+                  aria-label="Previous project"
                   title="Previous project (←)"
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -631,69 +503,57 @@ export const ProjectsSection = () => {
                 <button
                   onClick={nextSlide}
                   className="p-2 rounded-lg text-foreground hover:bg-[#c88746]/10 hover:text-[#c88746] transition-colors"
-                  aria-label="Next project (→)"
+                  aria-label="Next project"
                   title="Next project (→)"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
-
             </div>
           </div>
 
-          {/* Autoplay Progress Line Bar */}
-          {isAutoplay && (
-            <div className="w-full h-1 bg-muted rounded-full overflow-hidden mb-6">
-              <div
-                className="h-full bg-gradient-to-r from-[#8a4b1f] via-[#c88746] to-[#d49b64] transition-all duration-75 ease-linear"
-                style={{ width: `${autoplayProgress}%` }}
-              />
-            </div>
-          )}
-
-          {/* Jump Slide Tab Selector */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none">
-            {projects.map((proj, idx) => (
-              <button
-                key={proj.id}
-                onClick={() => switchSlide(idx)}
-                className={`flex-shrink-0 flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold font-mono transition-all ${
-                  activeSlide === idx
-                    ? "bg-[#8a4b1f] dark:bg-[#d49b64] text-white dark:text-[#181310] shadow-lg shadow-[#c88746]/25 scale-[1.02]"
-                    : "border border-border/80 bg-card/60 text-muted-foreground hover:text-foreground hover:border-border"
-                }`}
-              >
-                <span className="font-bold opacity-80">{proj.number}.</span>
-                <span>{proj.shortTitle}</span>
-              </button>
-            ))}
+          {/* Clean Horizontal Project Switcher Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
+            {projects.map((proj, idx) => {
+              const isActive = activeSlide === idx;
+              return (
+                <button
+                  key={proj.id}
+                  onClick={() => switchSlide(idx)}
+                  className={`flex-shrink-0 flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold font-mono transition-all ${
+                    isActive
+                      ? "bg-[#8a4b1f] dark:bg-[#d49b64] text-white dark:text-[#181310] shadow-md shadow-[#c88746]/20"
+                      : "border border-border/80 bg-card/70 text-muted-foreground hover:text-foreground hover:border-border"
+                  }`}
+                >
+                  <span className="font-bold opacity-80">{proj.number}.</span>
+                  <span>{proj.shortTitle}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* ============================================================== */}
-          {/* MAIN 3D SHOWCASE STAGE */}
+          {/* MAIN SHOWCASE CARD */}
           {/* ============================================================== */}
           <div
             key={currentProject.id}
-            className={`card-base border-[#c88746]/35 overflow-hidden shadow-3d-glow animate-slide-3d transition-all duration-300 ${
-              isTransitioning ? "opacity-60 scale-[0.99] blur-[0.5px]" : "opacity-100 scale-100"
+            className={`card-base border-[#c88746]/30 overflow-hidden shadow-lg p-0 transition-all duration-300 ${
+              isTransitioning ? "opacity-60 scale-[0.99]" : "opacity-100 scale-100"
             }`}
           >
             <div className="grid lg:grid-cols-12 gap-0">
               
-              {/* Left Column: Interactive 3D Device Chassis with Depth & Parallax */}
+              {/* Left Column: Clean System Interface Preview */}
               <div
-                className="lg:col-span-6 bg-gradient-to-br from-muted/40 via-muted/20 to-background p-6 sm:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-border/70 relative perspective-1200 cursor-grab active:cursor-grabbing select-none"
+                className="lg:col-span-6 bg-gradient-to-br from-muted/30 via-background to-muted/20 p-6 sm:p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-border/70 relative select-none"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
               >
-                
-                {/* Ambient Halo Behind Device */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#c88746]/10 to-transparent pointer-events-none rounded-l-2xl" />
-
-                {/* Top Badge Overlay with Floating Depth */}
-                <div className="flex items-center justify-between mb-5 relative z-20">
+                {/* Viewport Header */}
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#c88746]/10 text-[#8a4b1f] dark:text-[#f0ca9f] border border-[#c88746]/30 font-bold shadow-sm">
+                    <span className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#c88746]/10 text-[#8a4b1f] dark:text-[#f0ca9f] border border-[#c88746]/30 font-bold">
                       {currentProject.category}
                     </span>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border">
@@ -701,118 +561,75 @@ export const ProjectsSection = () => {
                     </span>
                   </div>
 
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold text-[#8a4b1f] dark:text-[#f0ca9f] bg-[#c88746]/10 px-2.5 py-0.5 rounded-full border border-[#c88746]/30">
-                    <Sparkles className="w-3 h-3 text-[#c88746]" />
-                    {currentProject.accentPill}
-                  </span>
+                  <button
+                    onClick={() => setActiveModalProject(currentProject)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-mono text-muted-foreground hover:text-foreground hover:bg-card border border-transparent hover:border-border transition-colors"
+                    title={language === "id" ? "Perbesar tampilan" : "Expand preview"}
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" />
+                    <span>{language === "id" ? "Perbesar" : "Expand"}</span>
+                  </button>
                 </div>
 
-                {/* 3D FLOATING DEVICE CHASSIS (TITANIUM BROWSER FRAME) */}
+                {/* Screenshot Frame with Gentle Subtle Tilt */}
                 <div
-                  className="relative rounded-2xl border-2 border-border/90 bg-card/95 shadow-3d preserve-3d transition-transform duration-150 ease-out my-auto"
+                  className="relative rounded-xl border border-border/90 bg-card p-3 shadow-md my-auto transition-transform duration-200 ease-out group"
                   style={{
-                    transform: getDeviceTransform(),
+                    transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
                   }}
                 >
-                  
-                  {/* Browser Chrome Header (Titlebar + Traffic Lights + URL Bar) */}
-                  <div className="flex items-center justify-between px-4 py-2.5 bg-muted/80 border-b border-border/80 rounded-t-[14px]">
-                    
-                    {/* Traffic Lights */}
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-red-500/80 shadow-xs" />
-                      <div className="w-3 h-3 rounded-full bg-amber-500/80 shadow-xs" />
-                      <div className="w-3 h-3 rounded-full bg-emerald-500/80 shadow-xs" />
-                    </div>
-
-                    {/* Simulated Real URL Bar */}
-                    <div className="flex-1 max-w-xs mx-3 px-3 py-1 rounded-lg bg-background/80 border border-border/70 text-[11px] font-mono text-muted-foreground flex items-center justify-between shadow-inner truncate">
-                      <span className="truncate">{currentProject.displayUrl}</span>
-                      <span className="text-[9px] font-bold text-emerald-500 ml-1">● SSL</span>
-                    </div>
-
-                    {/* Action Controls */}
-                    <button
-                      onClick={() => setActiveModalProject(currentProject)}
-                      className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-background/80 transition-colors"
-                      title="Inspect full screen"
-                    >
-                      <Maximize2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  {/* Primary Screenshot Viewport with 3D Specular Glare */}
-                  <div className="relative overflow-hidden rounded-b-[14px] bg-background/90 min-h-[280px] sm:min-h-[350px] flex items-center justify-center p-3 group">
-                    
+                  <div className="rounded-lg overflow-hidden bg-muted/40 aspect-[16/10] flex items-center justify-center relative">
                     <img
                       src={currentProject.images[activeImageIndex] || currentProject.images[0]}
-                      alt={`${currentProject.title} preview`}
-                      className="w-full h-full object-contain max-h-[360px] rounded-lg transition-transform duration-500 group-hover:scale-[1.03]"
-                      style={{
-                        transform: "translateZ(20px)",
-                      }}
+                      alt={`${currentProject.title} screenshot`}
+                      className="w-full h-full object-contain max-h-[360px] rounded-md transition-transform duration-300 group-hover:scale-[1.01]"
                     />
 
-                    {/* Dynamic 3D Specular Glare Overlay tracking mouse */}
+                    {/* Specular Glare */}
                     <div
                       className="absolute inset-0 pointer-events-none transition-opacity duration-300"
                       style={{
-                        background: `radial-gradient(circle 320px at ${tilt.glareX}% ${tilt.glareY}%, rgba(255, 255, 255, ${tilt.opacity * 0.45}), transparent 65%)`,
+                        background: `radial-gradient(circle 260px at ${tilt.glareX}% ${tilt.glareY}%, rgba(255, 255, 255, ${tilt.opacity}), transparent 70%)`,
                       }}
                     />
-
-                    {/* Floating 3D Badge */}
-                    <div
-                      className="absolute bottom-4 left-4 px-3 py-1.5 rounded-xl bg-card/90 backdrop-blur-md border border-[#c88746]/40 text-foreground text-xs font-mono font-bold shadow-xl flex items-center gap-2"
-                      style={{
-                        transform: "translateZ(45px)",
-                      }}
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#c88746]" />
-                      <span>{currentProject.accentPill || currentProject.shortTitle}</span>
-                    </div>
-
                   </div>
-
                 </div>
 
-                {/* Interactive Multi-Screenshot Thumbnail Switcher */}
-                <div className="mt-5 pt-3 border-t border-border/70 flex items-center justify-between relative z-20">
-                  <div className="flex items-center gap-2">
+                {/* Thumbnail Switcher (if multiple images) */}
+                {currentProject.images.length > 1 ? (
+                  <div className="mt-5 pt-3 border-t border-border/70 flex items-center gap-2">
                     <span className="text-[11px] font-mono text-muted-foreground mr-1">
-                      Views ({currentProject.images.length}):
+                      Views:
                     </span>
                     {currentProject.images.map((img, imgIdx) => (
                       <button
                         key={imgIdx}
                         onClick={() => setActiveImageIndex(imgIdx)}
-                        className={`w-14 h-9 rounded-lg overflow-hidden border-2 transition-all relative ${
+                        className={`w-14 h-9 rounded-lg overflow-hidden border-2 transition-all ${
                           activeImageIndex === imgIdx
-                            ? "border-[#c88746] scale-105 shadow-md shadow-[#c88746]/25"
-                            : "border-border/70 opacity-60 hover:opacity-100 hover:scale-102"
+                            ? "border-[#c88746] scale-105 shadow-sm"
+                            : "border-border/70 opacity-60 hover:opacity-100"
                         }`}
-                        title={`View angle ${imgIdx + 1}`}
+                        title={`View ${imgIdx + 1}`}
                       >
                         <img
                           src={img}
                           alt="thumbnail"
                           className="w-full h-full object-cover"
                         />
-                        {activeImageIndex === imgIdx && (
-                          <span className="absolute bottom-0 right-0 w-2 h-2 bg-[#c88746] rounded-tl-sm" />
-                        )}
                       </button>
                     ))}
                   </div>
-
-                  <span className="text-[10px] font-mono text-muted-foreground hidden sm:inline">
-                    Drag/Move to tilt 3D
-                  </span>
-                </div>
+                ) : (
+                  <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+                    <span>{currentProject.accentPill}</span>
+                    <span className="opacity-70">Production Verified</span>
+                  </div>
+                )}
 
               </div>
 
-              {/* Right Column: Engineering Rigor, Problems, Solutions & Specs */}
+              {/* Right Column: Informative, Senior Engineering Specs */}
               <div className="lg:col-span-6 p-6 sm:p-8 flex flex-col justify-between space-y-6">
                 
                 <div className="space-y-4">
@@ -833,41 +650,43 @@ export const ProjectsSection = () => {
                     {currentProject.overview}
                   </p>
 
-                  {/* Challenge & Solution Architecture Grid with 3D Depth */}
-                  <div className="grid sm:grid-cols-2 gap-3 pt-2">
-                    <div className="p-3.5 rounded-xl border border-border/80 bg-muted/30 hover:border-border transition-colors">
+                  {/* Architecture & Scope Grid */}
+                  <div className="grid sm:grid-cols-2 gap-3 pt-1">
+                    <div className="p-3.5 rounded-xl border border-border/80 bg-muted/20">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1">
-                        {language === "id" ? "Tantangan Kunci" : "Technical Challenge"}
-                      </span>
-                      <p className="text-xs text-foreground/90 leading-relaxed">
-                        {currentProject.challenge}
-                      </p>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl border border-[#c88746]/35 bg-[#c88746]/[0.06] hover:border-[#c88746]/60 transition-colors">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a4b1f] dark:text-[#f0ca9f] block mb-1">
-                        {language === "id" ? "Solusi Rekayasa" : "Engineering Solution"}
+                        {language === "id" ? "Solusi Rekayasa" : "Engineering Architecture"}
                       </span>
                       <p className="text-xs text-foreground/90 leading-relaxed">
                         {currentProject.solution}
                       </p>
                     </div>
-                  </div>
 
-                  {/* Production Scope & Deliverable */}
-                  <div className="p-3 rounded-xl border border-[#c88746]/30 bg-[#c88746]/[0.05] flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-[#c88746] flex-shrink-0" />
-                      <span className="text-xs font-semibold text-foreground">
-                        {currentProject.deliverable}
+                    <div className="p-3.5 rounded-xl border border-[#c88746]/30 bg-[#c88746]/[0.05]">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#8a4b1f] dark:text-[#f0ca9f] block mb-1">
+                        {language === "id" ? "Cakupan Deliverable" : "Production Scope"}
                       </span>
+                      <p className="text-xs text-foreground/90 leading-relaxed">
+                        {currentProject.deliverable}
+                      </p>
                     </div>
-                    <span className="text-[10px] font-mono uppercase font-bold text-[#8a4b1f] dark:text-[#f0ca9f]">
-                      {language === "id" ? "Terverifikasi" : "Verified Scope"}
-                    </span>
                   </div>
 
-                  {/* Applied Technologies (Vibrant Framework Badges) */}
+                  {/* Key Responsibilities & Deliverables */}
+                  <div className="space-y-2 pt-1">
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground block font-bold">
+                      {language === "id" ? "Implementasi Utama:" : "Key Deliverables:"}
+                    </span>
+                    <div className="space-y-1.5">
+                      {currentProject.contributions.slice(0, 3).map((item, idx) => (
+                        <div key={idx} className="flex items-start gap-2 text-xs text-foreground/90 leading-relaxed">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#c88746] flex-shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Applied Technologies */}
                   <div className="space-y-2 pt-2">
                     <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground block font-bold">
                       Applied Tech Stack:
@@ -895,10 +714,10 @@ export const ProjectsSection = () => {
                     className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border/80 bg-muted/40 text-xs font-semibold hover:border-[#c88746]/50 hover:text-[#c88746] transition-colors"
                   >
                     <Info className="w-3.5 h-3.5 text-[#c88746]" />
-                    <span>{language === "id" ? "Detail Arsitektur Lengkap" : "Full Architecture Case Study"}</span>
+                    <span>{language === "id" ? "Detail Studi Kasus" : "Case Study Details"}</span>
                   </button>
 
-                  {/* External Live Portal Button */}
+                  {/* External Live Portal Button or Internal Badge */}
                   {currentProject.link ? (
                     <a
                       href={currentProject.link}
@@ -910,8 +729,9 @@ export const ProjectsSection = () => {
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   ) : (
-                    <span className="text-xs text-muted-foreground font-mono italic">
-                      {language === "id" ? "🔒 Akses Internal Enterprise" : "🔒 Internal Enterprise System"}
+                    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-mono bg-muted/50 px-3.5 py-2 rounded-xl border border-border/70">
+                      <Lock className="w-3.5 h-3.5" />
+                      <span>{language === "id" ? "Sistem Internal Enterprise" : "Internal Enterprise System"}</span>
                     </span>
                   )}
 
@@ -922,119 +742,45 @@ export const ProjectsSection = () => {
             </div>
           </div>
 
-          {/* ============================================================== */}
-          {/* 3D COVERFLOW STAGE CAROUSEL (BOTTOM STRIP) */}
-          {/* ============================================================== */}
-          <div className="mt-12 pt-8 border-t border-border/70">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <span className="text-xs font-mono font-bold text-foreground uppercase tracking-wider block">
-                  3D CoverFlow Navigation • All 6 Systems
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Click any project card or swipe to bring it to center stage
-                </span>
-              </div>
-              <span className="text-xs text-muted-foreground font-mono hidden sm:inline">
-                Keyboard ← / → Active
-              </span>
-            </div>
-
-            {/* 3D Perspective Stage Container */}
-            <div
-              ref={coverflowRef}
-              className="relative perspective-1600 overflow-x-hidden py-4 select-none"
-              onMouseDown={(e) => {
-                setIsDragging(true);
-                setStartX(e.clientX);
-              }}
-              onMouseUp={(e) => {
-                if (!isDragging) return;
-                setIsDragging(false);
-                const diff = e.clientX - startX;
-                if (diff > 40) prevSlide();
-                else if (diff < -40) nextSlide();
-              }}
-              onTouchStart={(e) => {
-                setStartX(e.touches[0].clientX);
-              }}
-              onTouchEnd={(e) => {
-                const diff = e.changedTouches[0].clientX - startX;
-                if (diff > 40) prevSlide();
-                else if (diff < -40) nextSlide();
-              }}
+          {/* Clean Bottom Navigation Footer between Projects */}
+          <div className="mt-8 flex items-center justify-between px-2">
+            <button
+              onClick={prevSlide}
+              className="inline-flex items-center gap-2 text-xs font-mono text-muted-foreground hover:text-[#8a4b1f] dark:hover:text-[#f0ca9f] transition-colors py-2"
             >
-              <div className="flex overflow-x-auto pb-4 gap-3 sm:grid sm:grid-cols-3 lg:grid-cols-6 sm:gap-4 sm:overflow-visible scrollbar-none snap-x preserve-3d">
-                {projects.map((proj, idx) => {
-                  const isActive = activeSlide === idx;
-                  const distance = idx - activeSlide;
+              <ChevronLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">
+                {language === "id" ? "Sebelumnya:" : "Previous:"} {projects[(activeSlide - 1 + projects.length) % projects.length].shortTitle}
+              </span>
+              <span className="sm:hidden">{language === "id" ? "Sebelumnya" : "Prev"}</span>
+            </button>
 
-                  // 3D rotation angle based on relative distance to active card
-                  let rotateY = 0;
-                  let translateZ = 0;
-                  let scale = 1;
-
-                  if (isActive) {
-                    rotateY = 0;
-                    translateZ = 30;
-                    scale = 1.05;
-                  } else if (distance < 0) {
-                    rotateY = 16;
-                    translateZ = -20;
-                    scale = 0.95;
-                  } else {
-                    rotateY = -16;
-                    translateZ = -20;
-                    scale = 0.95;
-                  }
-
-                  return (
-                    <button
-                      key={proj.id}
-                      onClick={() => switchSlide(idx)}
-                      className={`min-w-[170px] sm:min-w-0 flex-shrink-0 sm:flex-shrink snap-center text-left p-3.5 rounded-2xl border transition-all duration-300 relative preserve-3d group ${
-                        isActive
-                          ? "border-[#c88746] bg-[#c88746]/[0.1] shadow-3d-glow z-20"
-                          : "border-border/80 bg-card/70 hover:border-border hover:bg-muted/50 opacity-70 hover:opacity-100 z-10"
-                      }`}
-                      style={{
-                        transform: `perspective(800px) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
-                      }}
-                    >
-                      {/* Thumbnail with 3D drop shadow */}
-                      <div className="aspect-[16/10] w-full rounded-xl overflow-hidden mb-2.5 bg-background border border-border/70 group-hover:scale-102 transition-transform">
-                        <img
-                          src={proj.images[0]}
-                          alt={proj.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-
-                      {/* Header with Project Number */}
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[11px] font-mono font-bold text-[#8a4b1f] dark:text-[#f0ca9f]">
-                          {proj.number}
-                        </span>
-                        {isActive && (
-                          <span className="w-2 h-2 rounded-full bg-[#c88746] shadow-xs" />
-                        )}
-                      </div>
-
-                      {/* Title */}
-                      <h4 className="text-xs font-bold text-foreground truncate">
-                        {proj.shortTitle}
-                      </h4>
-
-                      {/* Category */}
-                      <p className="text-[10px] text-muted-foreground truncate mt-0.5">
-                        {proj.category}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Pagination Dots */}
+            <div className="flex items-center gap-1.5">
+              {projects.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => switchSlide(idx)}
+                  className={`h-2 rounded-full transition-all ${
+                    activeSlide === idx
+                      ? "w-6 bg-[#8a4b1f] dark:bg-[#d49b64]"
+                      : "w-2 bg-border hover:bg-muted-foreground/50"
+                  }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
             </div>
 
+            <button
+              onClick={nextSlide}
+              className="inline-flex items-center gap-2 text-xs font-mono text-muted-foreground hover:text-[#8a4b1f] dark:hover:text-[#f0ca9f] transition-colors py-2"
+            >
+              <span className="hidden sm:inline">
+                {language === "id" ? "Selanjutnya:" : "Next:"} {projects[(activeSlide + 1) % projects.length].shortTitle}
+              </span>
+              <span className="sm:hidden">{language === "id" ? "Selanjutnya" : "Next"}</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
 
         </div>

@@ -131,6 +131,10 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({ open, setOpen }) => {
             <span className="font-semibold text-[#8c6747] dark:text-[#cbb29b] mr-2">Jaja.id</span>
             <span>Hobby Marketplace (Vue.js & Firebase)</span>
           </CommandItem>
+          <CommandItem onSelect={() => scrollTo("projects")}>
+            <span className="font-semibold text-[#8c6747] dark:text-[#cbb29b] mr-2">Eureka</span>
+            <span>Book House & Educational E-Commerce (Vue.js)</span>
+          </CommandItem>
         </CommandGroup>
 
         <CommandSeparator />

@@ -13,7 +13,6 @@ const Footer = () => {
     { id: "experience", label: t("experience") },
     { id: "projects", label: t("projects") },
     { id: "skills", label: t("skills") },
-    { id: "expertise", label: t("expertise") },
     { id: "contact", label: t("contact") },
   ];
 

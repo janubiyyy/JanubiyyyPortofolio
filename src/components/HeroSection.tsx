@@ -22,20 +22,23 @@ const HeroSection = () => {
   const { language } = useLanguage();
   const [copied, setCopied] = useState(false);
   const [currentTime, setCurrentTime] = useState("");
-  const [heroTilt, setHeroTilt] = useState({ x: 0, y: 0 });
+  const [heroTilt, setHeroTilt] = useState({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
 
   const handleHeroMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
     setHeroTilt({
-      x: -(y / (rect.height / 2)) * 6,
-      y: (x / (rect.width / 2)) * 6,
+      x: -(y / (rect.height / 2)) * 8,
+      y: (x / (rect.width / 2)) * 8,
+      glareX: ((e.clientX - rect.left) / rect.width) * 100,
+      glareY: ((e.clientY - rect.top) / rect.height) * 100,
+      opacity: 0.25,
     });
   };
 
   const handleHeroMouseLeave = () => {
-    setHeroTilt({ x: 0, y: 0 });
+    setHeroTilt({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
   };
 
   // Live Jakarta Time
@@ -150,7 +153,7 @@ const HeroSection = () => {
                 </span>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#c88746]" />
                 <span className="text-xs sm:text-sm font-semibold text-muted-foreground">
-                  Jakarta, Indonesia
+                  Senior Frontend Developer
                 </span>
               </div>
 
@@ -255,22 +258,15 @@ const HeroSection = () => {
                 </div>
                 <div className="w-px h-8 bg-border" />
                 <div>
-                  <div className="text-2xl sm:text-3xl font-extrabold text-gradient">Enterprise</div>
-                  <div className="text-xs text-muted-foreground font-medium mt-0.5">
-                    {language === "id" ? "Sistem Tol & Spasial" : "Toll Ops & GIS Web"}
-                  </div>
-                </div>
-                <div className="w-px h-8 bg-border" />
-                <div>
                   <div className="text-2xl sm:text-3xl font-extrabold text-gradient">3.61 GPA</div>
                   <div className="text-xs text-muted-foreground font-medium mt-0.5">
-                    B.Sc Information Systems
+                    B.Sc Information Systems (Cum Laude)
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Clean, Fluid, Organic Portrait (Zero Duplication) */}
+            {/* Right Column: Clean, Fluid, Organic 3D Portrait */}
             <div className="lg:col-span-5 animate-fade-up delay-300">
               <div className="relative mx-auto max-w-sm sm:max-w-md lg:max-w-none pt-2 pb-4">
                 
@@ -279,7 +275,7 @@ const HeroSection = () => {
 
                 {/* Fluid 3D Tilt Container */}
                 <div
-                  className="relative preserve-3d transition-transform duration-200 ease-out"
+                  className="relative preserve-3d transition-transform duration-200 ease-out cursor-pointer"
                   onMouseMove={handleHeroMouseMove}
                   onMouseLeave={handleHeroMouseLeave}
                   style={{
@@ -287,25 +283,42 @@ const HeroSection = () => {
                   }}
                 >
                   
+                  {/* Floating Top-Left Micro Badge */}
+                  <div
+                    className="absolute -top-3 -left-3 sm:-left-4 px-3 py-1.5 rounded-xl bg-card/90 backdrop-blur-xl border border-[#c88746]/40 text-foreground text-[11px] font-mono font-bold shadow-xl flex items-center gap-2 z-20"
+                    style={{ transform: "translateZ(35px)" }}
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#c88746]" />
+                    <span>Next.js • React • TS</span>
+                  </div>
+
                   {/* Organic Framed Portrait Container */}
                   <div className="relative w-full aspect-[4/5] sm:h-[480px] rounded-[2.5rem] overflow-hidden border border-[#c88746]/30 bg-card/40 backdrop-blur-md shadow-2xl shadow-[#8a4b1f]/10 group">
                     <img
                       src="/lovable-uploads/3823d0ef-236b-4b7b-aba0-c4d8e89f0813.png"
                       alt="Tasya Khaerani Janubiya"
-                      className="w-full h-full object-cover object-[68%_74%] scale-[1.22] transition-transform duration-700 group-hover:scale-[1.26]"
+                      className="w-full h-full object-cover object-[68%_74%] scale-[1.22] transition-transform duration-700 group-hover:scale-[1.25]"
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).src = "/assets/tasya.png";
                       }}
                     />
 
-                    {/* Subtle soft edge gradient for a smooth organic finish */}
+                    {/* Dynamic 3D Specular Glare Tracking */}
+                    <div
+                      className="absolute inset-0 pointer-events-none rounded-[2.5rem] transition-opacity duration-300"
+                      style={{
+                        background: `radial-gradient(circle 280px at ${heroTilt.glareX}% ${heroTilt.glareY}%, rgba(255, 255, 255, ${heroTilt.opacity}), transparent 65%)`,
+                      }}
+                    />
+
+                    {/* Subtle soft edge ring for smooth organic finish */}
                     <div className="absolute inset-0 rounded-[2.5rem] ring-1 ring-inset ring-white/10 pointer-events-none" />
                   </div>
 
                   {/* Floating Role & Experience Badge on Photo */}
                   <div
-                    className="absolute -bottom-4 right-4 sm:right-6 px-4 py-2.5 rounded-2xl bg-card/95 backdrop-blur-xl border border-[#c88746]/45 text-foreground shadow-2xl shadow-[#8a4b1f]/20 flex items-center gap-3.5"
-                    style={{ transform: "translateZ(40px)" }}
+                    className="absolute -bottom-4 right-4 sm:right-6 px-4 py-2.5 rounded-2xl bg-card/95 backdrop-blur-xl border border-[#c88746]/45 text-foreground shadow-2xl shadow-[#8a4b1f]/20 flex items-center gap-3.5 z-20"
+                    style={{ transform: "translateZ(45px)" }}
                   >
                     <div className="w-9 h-9 rounded-xl bg-[#c88746]/15 border border-[#c88746]/30 flex items-center justify-center flex-shrink-0">
                       <Briefcase className="w-4 h-4 text-[#8a4b1f] dark:text-[#f0ca9f]" />
