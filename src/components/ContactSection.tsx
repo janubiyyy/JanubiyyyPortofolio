@@ -1,429 +1,294 @@
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Download, Send, Mail, Phone, MapPin, Globe } from "lucide-react";
-import jsPDF from "jspdf";
+import {
+  Mail,
+  MapPin,
+  Linkedin,
+  Github,
+  Download,
+  Send,
+  Copy,
+  Check,
+  MessageSquare,
+  Sparkles,
+  ExternalLink,
+} from "lucide-react";
 
 const ContactSection = () => {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
+  const [copied, setCopied] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     company: "",
     subject: "",
     message: "",
-    projectType: "",
   });
 
-  const contactInfo = [
-    {
-      type: t("email"),
-      value: "tasyakhaerani66@gmail.com",
-      href: "mailto:tasyakhaerani66@gmail.com",
-      icon: <Mail className="w-5 h-5" />,
-    },
-    {
-      type: t("phone"),
-      value: "+62 857-7194-2063",
-      href: "tel:+6285771942063",
-      icon: <Phone className="w-5 h-5" />,
-    },
-    {
-      type: t("location"),
-      value: "Jakarta, Indonesia",
-      href: "#",
-      icon: <MapPin className="w-5 h-5" />,
-    },
-    {
-      type: "Website",
-      value: "profile.janubiyyy.tech",
-      href: "https://janubiyyy-portofolio.vercel.app/",
-      icon: <Globe className="w-5 h-5" />,
-    },
-  ];
+  const copyEmail = () => {
+    navigator.clipboard.writeText("tasyakhaerani66@gmail.com");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
-  const socialLinks = [
-    {
-      name: "LinkedIn",
-      url: "https://linkedin.com/in/tasyakhaerani",
-      icon: "💼",
-    },
-    {
-      name: "Portfolio",
-      url: "https://janubiyyy-portofolio.vercel.app/",
-      icon: "🌐",
-    },
-    {
-      name: "GitHub",
-      url: "https://github.com/janubiyyy",
-      icon: "👨‍💻",
-    },
-  ];
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const whatsappNumber = "6285771942063";
+    const msg = `*Halo Tasya Khaerani!*
+
+👤 *Nama:* ${formData.name}
+📧 *Email:* ${formData.email}${formData.company ? `\n🏢 *Perusahaan:* ${formData.company}` : ""}
+
+🎯 *Subjek:* ${formData.subject}
+
+💬 *Pesan:*
+${formData.message}
+
+_Dikirim melalui portfolio https://janubiyyy-portofolio.vercel.app/_`;
+
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`, "_blank");
+    setFormData({ name: "", email: "", company: "", subject: "", message: "" });
+  };
 
   const downloadCV = () => {
-    const pdfUrl = "/assets/Resume-Tasya-Khaerani-Janubiya-Developer.pdf";
-    console.log("Attempting to download:", pdfUrl); // Debug
     const link = document.createElement("a");
-    link.href = pdfUrl;
+    link.href = "/assets/Resume-Tasya-Khaerani-Janubiya-Developer.pdf";
     link.download = "Resume-Tasya-Khaerani-Janubiya-Developer.pdf";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Enhanced WhatsApp message template
-    const whatsappNumber = "6285771942063";
-    const projectTypeEmoji = {
-      "Frontend Developer": "⚛️",
-      "React Developer": "🔵",
-      "Web Developer": "🌐",
-      "Apps Developer": "📱",
-      "Full Stack Developer": "🚀",
-    };
-
-    const whatsappMessage = `🌟 *Halo Tasya! Saya tertarik dengan expertise Anda* 🌟
-
-👋 Perkenalkan, saya *${formData.name}*
-📧 Email: ${formData.email}
-${formData.company ? `🏢 Perusahaan: ${formData.company}` : ""}
-
-🎯 *Subjek:* ${formData.subject}
-${
-  formData.projectType
-    ? `${
-        projectTypeEmoji[
-          formData.projectType as keyof typeof projectTypeEmoji
-        ] || "💼"
-      } *Jenis Developer:* ${formData.projectType}`
-    : ""
-}
-
-💬 *Detail Kebutuhan:*
-${formData.message}
-
----
-✨ Saya sangat tertarik dengan pengalaman Anda di:
-• Frontend Development (Next.js, React, Vue.js)
-• Mobile Development (React Native)
-• Performance Optimization
-• UI/UX Implementation
-
-Mari kita diskusikan bagaimana kita bisa berkolaborasi untuk mewujudkan project yang amazing! 🚀
-
-Best regards,
-${formData.name} 🙏
-
-*📩 Dikirim melalui website portfolio Anda*`;
-
-    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-      whatsappMessage
-    )}`;
-
-    // Open WhatsApp
-    window.open(whatsappURL, "_blank");
-
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      company: "",
-      subject: "",
-      message: "",
-      projectType: "",
-    });
-  };
-
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
-  };
-
-  const placeholders =
-    language === "id"
-      ? {
-          name: "Masukkan nama lengkap Anda",
-          email: "contoh@email.com",
-          company: "Nama perusahaan (opsional)",
-          subject: "Misal: Kolaborasi Proyek Website E-commerce",
-          message:
-            "Ceritakan tentang proyek yang ingin Anda diskusikan, timeline, budget range, teknologi yang diinginkan, atau pertanyaan teknis lainnya...",
-        }
-      : {
-          name: "Enter your full name",
-          email: "example@email.com",
-          company: "Company name (optional)",
-          subject: "e.g., E-commerce Website Collaboration",
-          message:
-            "Tell me about the project you want to discuss, timeline, budget range, preferred technologies, or any technical questions...",
-        };
+  const inputClass =
+    "w-full px-4 py-3 rounded-xl border border-border/80 bg-background/80 text-foreground text-sm placeholder:text-muted-foreground/60 " +
+    "focus:outline-none focus:ring-2 focus:ring-[#c88746]/50 focus:border-[#c88746] transition-all duration-200";
 
   return (
-    <section id="contact" className="py-20">
+    <section id="contact" className="py-24 relative" aria-label="Contact section">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-5xl mx-auto">
+          
+          {/* Section Header */}
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              <span className="text-transparent bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text">
-                {language === "id" ? "Mari Terhubung" : "Let's Connect"}
-              </span>
-            </h2>
-            <div className="w-20 h-1 bg-gradient-to-r from-amber-600 to-orange-600 mx-auto rounded-full mb-6"></div>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            <span className="section-label mb-3">
+              {language === "id" ? "Terhubung" : "Get In Touch"}
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground mt-2">
               {language === "id"
-                ? "Siap membantu mewujudkan proyek digital Anda! Mari diskusikan bagaimana kita bisa berkolaborasi dan menciptakan solusi teknologi yang amazing."
-                : "Ready to bring your digital project to life! Let's discuss how we can collaborate and create amazing technology solutions."}
+                ? "Mari Bangun Sesuatu yang Luar Biasa Bersama."
+                : "Let's Build Something Great Together."}
+            </h2>
+            <p className="text-muted-foreground mt-4 max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
+              {language === "id"
+                ? "Saya terbuka untuk peluang kerja Senior Frontend Developer, proyek skala enterprise, maupun diskusi arsitektur web modern."
+                : "Available for Senior Frontend roles, enterprise contracts, and scalable web engineering opportunities."}
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12">
-            {/* Contact Information */}
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-2xl font-bold text-foreground mb-6">
-                  {language === "id"
-                    ? "Informasi Kontak"
-                    : "Contact Information"}
-                </h3>
-
-                <div className="space-y-4">
-                  {contactInfo.map((info, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center space-x-4 p-4 rounded-xl bg-card border border-border hover:shadow-lg transition-all duration-300"
-                    >
-                      <div className="text-amber-600">{info.icon}</div>
-                      <div>
-                        <div className="text-sm text-muted-foreground font-medium">
-                          {info.type}
-                        </div>
-                        <a
-                          href={info.href}
-                          target={
-                            info.href.startsWith("http") ? "_blank" : undefined
-                          }
-                          rel={
-                            info.href.startsWith("http")
-                              ? "noopener noreferrer"
-                              : undefined
-                          }
-                          className="text-foreground hover:text-amber-600 transition-colors duration-200 font-medium"
-                        >
-                          {info.value}
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Download CV Button */}
-              <div className="pt-4">
-                <Button
-                  onClick={downloadCV}
-                  className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg mb-6"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  {language === "id"
-                    ? "Download CV (PDF)"
-                    : "Download CV (PDF)"}
-                </Button>
-              </div>
-
-              {/* Social Links */}
-              <div>
-                <h4 className="text-lg font-semibold text-foreground mb-4">
-                  {language === "id"
-                    ? "Terhubung Dengan Saya"
-                    : "Connect With Me"}
-                </h4>
-                <div className="flex space-x-4">
-                  {socialLinks.map((social, index) => (
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            
+            {/* Left Contact Cards */}
+            <div className="lg:col-span-5 space-y-4">
+              
+              {/* Email Card with Copy Button */}
+              <div className="card-base p-5 border-[#c88746]/30 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-[#c88746]/10 text-[#c88746] flex items-center justify-center border border-[#c88746]/20">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-mono text-muted-foreground uppercase">Email</span>
                     <a
-                      key={index}
-                      href={social.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-amber-600 to-orange-600 text-white hover:scale-110 transition-transform duration-200 shadow-lg"
-                      title={social.name}
+                      href="mailto:tasyakhaerani66@gmail.com"
+                      className="text-sm font-semibold text-foreground hover:text-[#c88746] transition-colors block"
                     >
-                      <span className="text-lg">{social.icon}</span>
+                      tasyakhaerani66@gmail.com
                     </a>
-                  ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={copyEmail}
+                  className="p-2 rounded-xl border border-border/80 bg-muted/40 text-muted-foreground hover:text-foreground hover:border-[#c88746]/50 transition-colors"
+                  title="Copy email"
+                >
+                  {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+
+              {/* Location Card */}
+              <div className="card-base p-5 flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-muted/60 text-[#c88746] flex items-center justify-center border border-border">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-mono text-muted-foreground uppercase">
+                    {language === "id" ? "Lokasi" : "Location"}
+                  </span>
+                  <p className="text-sm font-semibold text-foreground">
+                    Jakarta, Indonesia <span className="text-xs text-muted-foreground font-normal">(WIB / UTC+7)</span>
+                  </p>
                 </div>
               </div>
+
+              {/* Social Channels */}
+              <div className="grid grid-cols-2 gap-3">
+                <a
+                  href="https://linkedin.com/in/tasyakhaerani/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="card-base p-4 flex items-center gap-3 hover:border-[#c88746]/50 group transition-all"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                    <Linkedin className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase">Connect</span>
+                    <span className="text-xs font-bold text-foreground group-hover:text-[#c88746] block">
+                      LinkedIn
+                    </span>
+                  </div>
+                </a>
+
+                <a
+                  href="https://github.com/janubiyyy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="card-base p-4 flex items-center gap-3 hover:border-[#c88746]/50 group transition-all"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-muted text-foreground flex items-center justify-center">
+                    <Github className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase">Repos</span>
+                    <span className="text-xs font-bold text-foreground group-hover:text-[#c88746] block">
+                      GitHub
+                    </span>
+                  </div>
+                </a>
+              </div>
+
+              {/* Download Resume Full Button */}
+              <button
+                onClick={downloadCV}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-[#c88746]/40 bg-[#c88746]/10 text-[#8a4b1f] dark:text-[#f0ca9f] font-bold text-xs hover:bg-[#8a4b1f] hover:text-white dark:hover:bg-[#d49b64] dark:hover:text-[#181310] transition-all shadow-sm"
+              >
+                <Download className="w-4 h-4" />
+                {language === "id" ? "Unduh Resume PDF Lengkap" : "Download Complete Resume (PDF)"}
+              </button>
+
             </div>
 
-            {/* Contact Form */}
-            <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-foreground mb-2">
-                  💬 {language === "id" ? "Kirim Pesan" : "Send Message"}
+            {/* Right Contact Form */}
+            <div className="lg:col-span-7 card-base p-6 sm:p-8 space-y-5 border-[#c88746]/20 shadow-xl shadow-[#c88746]/5">
+              <div>
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-[#c88746]" />
+                  <span>{language === "id" ? "Kirim Pesan Langsung" : "Direct WhatsApp Inquiry"}</span>
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground mt-1">
                   {language === "id"
-                    ? "Pesan akan dikirim langsung ke WhatsApp saya!"
-                    : "Message will be sent directly to my WhatsApp!"}
+                    ? "Formulir ini akan langsung menyusun pesan dan membuka WhatsApp terverifikasi saya."
+                    : "This message will be instantly delivered to my direct WhatsApp channel."}
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label
-                      htmlFor="name"
-                      className="block text-sm font-medium text-foreground mb-2"
-                    >
-                      👤 {language === "id" ? "Nama Lengkap" : "Full Name"} *
+                    <label htmlFor="name" className="block text-xs font-medium text-foreground mb-1.5">
+                      {language === "id" ? "Nama Lengkap" : "Full Name"} *
                     </label>
                     <input
                       type="text"
                       id="name"
                       value={formData.name}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent transition-all duration-200"
-                      placeholder={placeholders.name}
+                      onChange={handleChange}
+                      className={inputClass}
+                      placeholder={language === "id" ? "Nama Anda" : "Your Name"}
                       required
                     />
                   </div>
-
                   <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-foreground mb-2"
-                    >
-                      📧 Email *
+                    <label htmlFor="email" className="block text-xs font-medium text-foreground mb-1.5">
+                      Email *
                     </label>
                     <input
                       type="email"
                       id="email"
                       value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent transition-all duration-200"
-                      placeholder={placeholders.email}
+                      onChange={handleChange}
+                      className={inputClass}
+                      placeholder="you@company.com"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="company"
-                      className="block text-sm font-medium text-foreground mb-2"
-                    >
-                      🏢 {language === "id" ? "Perusahaan" : "Company"} (
-                      {language === "id" ? "opsional" : "optional"})
-                    </label>
-                    <input
-                      type="text"
-                      id="company"
-                      value={formData.company}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent transition-all duration-200"
-                      placeholder={placeholders.company}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="projectType"
-                      className="block text-sm font-medium text-foreground mb-2"
-                    >
-                      💻{" "}
-                      {language === "id" ? "Jenis Developer" : "Developer Type"}
-                    </label>
-                    <select
-                      id="projectType"
-                      value={formData.projectType}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent transition-all duration-200"
-                    >
-                      <option value="">
-                        {language === "id"
-                          ? "Pilih jenis developer"
-                          : "Select developer type"}
-                      </option>
-                      <option value="Frontend Developer">
-                        ⚛️ Frontend Developer
-                      </option>
-                      <option value="React Developer">
-                        🔵 React Developer
-                      </option>
-                      <option value="Web Developer">🌐 Web Developer</option>
-                      <option value="Apps Developer">📱 Apps Developer</option>
-                      <option value="Full Stack Developer">
-                        🚀 Full Stack Developer
-                      </option>
-                    </select>
-                  </div>
+                <div>
+                  <label htmlFor="company" className="block text-xs font-medium text-foreground mb-1.5">
+                    {language === "id" ? "Perusahaan / Organisasi (Opsional)" : "Company / Organization (Optional)"}
+                  </label>
+                  <input
+                    type="text"
+                    id="company"
+                    value={formData.company}
+                    onChange={handleChange}
+                    className={inputClass}
+                    placeholder={language === "id" ? "Nama perusahaan" : "Company Name"}
+                  />
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="subject"
-                    className="block text-sm font-medium text-foreground mb-2"
-                  >
-                    🎯 {language === "id" ? "Subjek" : "Subject"} *
+                  <label htmlFor="subject" className="block text-xs font-medium text-foreground mb-1.5">
+                    {language === "id" ? "Subjek Diskusi" : "Subject"} *
                   </label>
                   <input
                     type="text"
                     id="subject"
                     value={formData.subject}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent transition-all duration-200"
-                    placeholder={placeholders.subject}
+                    onChange={handleChange}
+                    className={inputClass}
+                    placeholder={language === "id" ? "Misal: Peluang Senior Frontend Developer" : "e.g. Senior Frontend Opportunity"}
                     required
                   />
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-sm font-medium text-foreground mb-2"
-                  >
-                    💭 {language === "id" ? "Pesan Detail" : "Detailed Message"}{" "}
-                    *
+                  <label htmlFor="message" className="block text-xs font-medium text-foreground mb-1.5">
+                    {language === "id" ? "Detail Pesan / Deskripsi Kebutuhan" : "Message"} *
                   </label>
                   <textarea
                     id="message"
-                    rows={5}
+                    rows={4}
                     value={formData.message}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-amber-600 focus:border-transparent transition-all duration-200 resize-none"
-                    placeholder={placeholders.message}
+                    onChange={handleChange}
+                    className={`${inputClass} resize-none`}
+                    placeholder={
+                      language === "id"
+                        ? "Ceritakan tentang proyek, peran yang dibuka, timeline, atau detail teknologi yang diinginkan..."
+                        : "Tell me about your project, team requirements, timeline, or tech stack..."
+                    }
                     required
                   />
                 </div>
 
-                <Button
+                <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#8a4b1f] dark:bg-[#d49b64] text-white dark:text-[#181310] font-bold text-sm hover:bg-[#733e19] dark:hover:bg-[#c68a4c] active:scale-[0.99] transition-all shadow-lg shadow-[#c88746]/20"
                 >
-                  <Send className="w-4 h-4 mr-2" />
-
-                  {language === "id"
-                    ? "Kirim via WhatsApp"
-                    : "Send via WhatsApp"}
-                </Button>
-
-                <p className="text-xs text-center text-muted-foreground">
-                  ✨{" "}
-                  {language === "id"
-                    ? "Pesan akan otomatis dikirim ke WhatsApp "
-                    : "Message will be automatically sent to WhatsApp"}
-                </p>
+                  <Send className="w-4 h-4" />
+                  <span>{language === "id" ? "Kirim via WhatsApp" : "Send via WhatsApp"}</span>
+                </button>
               </form>
             </div>
+
           </div>
+
         </div>
       </div>
     </section>

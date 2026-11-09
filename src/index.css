@@ -1,87 +1,72 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 45 23% 97%;
-    --foreground: 25 20% 15%;
+    /* Rich Warm Cream & Almond Ivory base */
+    --background: 34 33% 97%;
+    --foreground: 24 35% 15%;
 
-    --card: 45 23% 95%;
-    --card-foreground: 25 20% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 24 35% 15%;
 
-    --popover: 45 23% 95%;
-    --popover-foreground: 25 20% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 35% 15%;
 
-    --primary: 25 65% 45%;
-    --primary-foreground: 45 23% 97%;
+    /* Rich Warm Cognac / Bronze Brown */
+    --primary: 28 60% 40%;
+    --primary-foreground: 34 33% 97%;
 
-    --secondary: 45 15% 88%;
-    --secondary-foreground: 25 20% 20%;
+    --secondary: 30 25% 91%;
+    --secondary-foreground: 24 35% 15%;
 
-    --muted: 45 15% 90%;
-    --muted-foreground: 25 15% 50%;
+    --muted: 30 20% 92%;
+    --muted-foreground: 24 16% 45%;
 
-    --accent: 45 15% 85%;
-    --accent-foreground: 25 20% 20%;
+    --accent: 28 60% 40%;
+    --accent-foreground: 34 33% 97%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 45 12% 82%;
-    --input: 45 12% 82%;
-    --ring: 25 65% 45%;
+    --border: 30 20% 84%;
+    --input: 30 20% 84%;
+    --ring: 28 60% 40%;
 
-    --radius: 0.5rem;
-
-    --sidebar-background: 45 23% 95%;
-    --sidebar-foreground: 25 20% 25%;
-    --sidebar-primary: 25 65% 45%;
-    --sidebar-primary-foreground: 45 23% 97%;
-    --sidebar-accent: 45 15% 85%;
-    --sidebar-accent-foreground: 25 20% 20%;
-    --sidebar-border: 45 12% 80%;
-    --sidebar-ring: 25 65% 45%;
+    --radius: 0.85rem;
   }
 
   .dark {
-    --background: 25 15% 8%;
-    --foreground: 45 30% 92%;
+    /* Deep Warm Roasted Espresso & Dark Cognac */
+    --background: 24 25% 7%;
+    --foreground: 34 30% 94%;
 
-    --card: 25 15% 10%;
-    --card-foreground: 45 30% 92%;
+    --card: 24 22% 10%;
+    --card-foreground: 34 30% 94%;
 
-    --popover: 25 15% 10%;
-    --popover-foreground: 45 30% 92%;
+    --popover: 24 22% 10%;
+    --popover-foreground: 34 30% 94%;
 
-    --primary: 25 60% 65%;
-    --primary-foreground: 25 15% 8%;
+    /* Vibrant Warm Honey Bronze / Golden Cognac */
+    --primary: 32 65% 58%;
+    --primary-foreground: 24 25% 7%;
 
-    --secondary: 25 10% 18%;
-    --secondary-foreground: 45 30% 85%;
+    --secondary: 24 18% 15%;
+    --secondary-foreground: 34 30% 92%;
 
-    --muted: 25 10% 16%;
-    --muted-foreground: 45 15% 60%;
+    --muted: 24 18% 14%;
+    --muted-foreground: 30 16% 65%;
 
-    --accent: 25 10% 20%;
-    --accent-foreground: 45 30% 85%;
+    --accent: 32 65% 58%;
+    --accent-foreground: 24 25% 7%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 34 30% 95%;
 
-    --border: 25 10% 20%;
-    --input: 25 10% 20%;
-    --ring: 25 60% 65%;
-
-    --sidebar-background: 25 15% 6%;
-    --sidebar-foreground: 45 30% 85%;
-    --sidebar-primary: 25 60% 65%;
-    --sidebar-primary-foreground: 25 15% 6%;
-    --sidebar-accent: 25 10% 15%;
-    --sidebar-accent-foreground: 45 30% 85%;
-    --sidebar-border: 25 10% 18%;
-    --sidebar-ring: 25 60% 65%;
+    --border: 24 18% 18%;
+    --input: 24 18% 18%;
+    --ring: 32 65% 58%;
   }
 }
 
@@ -89,51 +74,155 @@
   * {
     @apply border-border;
   }
-
-  body {
-    @apply bg-background text-foreground;
+  html {
+    scroll-behavior: smooth;
   }
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-[#c68a4c] selection:text-white;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* ─── Custom Animations ─────────────────────────────────── */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fade-in {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-@keyframes slide-in {
-  0% {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
+@keyframes pulse-dot {
+  0%   { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0; }
 }
 
-@keyframes float {
+@keyframes float-subtle {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
+}
+
+@keyframes float-3d {
   0%, 100% {
-    transform: translateY(0);
+    transform: translateY(0) rotateX(0deg) rotateY(0deg);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-8px) rotateX(3deg) rotateY(-3deg);
   }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.6s ease-out;
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
 }
 
-.animate-slide-in {
-  animation: slide-in 0.5s ease-out;
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.04); }
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+@keyframes slide-cube-in {
+  from {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(-18deg) scale(0.96) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(0deg) scale(1) translateY(0);
+  }
+}
+
+.animate-fade-up   { animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-fade-in   { animation: fade-in 0.35s ease both; }
+.animate-float     { animation: float-subtle 4s ease-in-out infinite; }
+.animate-float-3d  { animation: float-3d 6s ease-in-out infinite; }
+.animate-glow      { animation: glow-pulse 3s ease-in-out infinite; }
+.animate-slide-3d  { animation: slide-cube-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+
+/* ─── Rich Brown Palette Utilities ────────────────────────── */
+
+/* Text Gradient: Warm Dark Cognac to Honey Bronze */
+.text-gradient {
+  background: linear-gradient(135deg, #8a4b1f 0%, #c88746 50%, #dfa565 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.dark .text-gradient {
+  background: linear-gradient(135deg, #f0ca9f 0%, #d49b64 50%, #ae723f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Badge with warm bronze border */
+.section-label {
+  @apply inline-flex items-center gap-2 px-3.5 py-1 text-xs font-bold tracking-wider uppercase
+         rounded-full border border-[#c88746]/40 bg-[#c88746]/10 text-[#8a4b1f] dark:text-[#f0ca9f] shadow-sm;
+}
+
+/* Rich Card with Warm Ambient Glow */
+.card-base {
+  @apply bg-card/95 border border-border/90 rounded-2xl shadow-sm
+         hover:border-[#c88746]/50 hover:shadow-xl hover:shadow-[#c88746]/5 transition-all duration-300;
+}
+
+/* Availability Live Pulse */
+.badge-available {
+  @apply inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full
+         bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30;
+}
+.badge-available::before {
+  content: '';
+  @apply w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0;
+  animation: pulse-dot 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+
+/* Nav links */
+.nav-link {
+  @apply relative text-sm font-semibold text-muted-foreground transition-colors duration-200;
+}
+.nav-link::after {
+  content: '';
+  @apply absolute -bottom-1 left-0 h-0.5 w-0 bg-[#c88746] rounded-full transition-all duration-300;
+}
+.nav-link:hover, .nav-link.active {
+  @apply text-foreground;
+}
+.nav-link:hover::after, .nav-link.active::after {
+  @apply w-full;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #c88746; }
+
+/* ─── 3D Perspective & Transform Utilities ───────────────── */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.perspective-1200 {
+  perspective: 1200px;
+}
+.perspective-1600 {
+  perspective: 1600px;
+}
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+}
+.shadow-3d {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+              0 0 30px rgba(200, 135, 70, 0.18);
+}
+.shadow-3d-glow {
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6),
+              0 0 40px rgba(200, 135, 70, 0.25);
 }

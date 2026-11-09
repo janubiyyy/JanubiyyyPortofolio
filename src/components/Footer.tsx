@@ -1,81 +1,120 @@
-
-import React from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import React from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Linkedin, Github, Mail, ArrowUp } from "lucide-react";
 
 const Footer = () => {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  const navLinks = [
+    { id: "home", label: t("home") },
+    { id: "about", label: t("about") },
+    { id: "experience", label: t("experience") },
+    { id: "projects", label: t("projects") },
+    { id: "skills", label: t("skills") },
+    { id: "expertise", label: t("expertise") },
+    { id: "contact", label: t("contact") },
+  ];
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const socials = [
+    { icon: <Linkedin className="w-4 h-4" />, href: "https://linkedin.com/in/tasyakhaerani/", label: "LinkedIn" },
+    { icon: <Github className="w-4 h-4" />, href: "https://github.com/janubiyyy", label: "GitHub" },
+    { icon: <Mail className="w-4 h-4" />, href: "mailto:tasyakhaerani66@gmail.com", label: "Email" },
+  ];
+
   return (
-    <footer className="bg-muted/50 border-t border-border py-12">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
+    <footer className="border-t border-border bg-background">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid sm:grid-cols-3 gap-10 mb-10">
             {/* Brand */}
-            <div className="text-center md:text-left">
-              <h3 className="text-2xl font-bold text-transparent bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text mb-4">
-                Tasya Khaerani Janubiya
-              </h3>
-              <p className="text-muted-foreground text-sm">
-                Frontend Developer passionate about creating beautiful and functional web experiences.
+            <div>
+              <button onClick={scrollToTop} className="text-xl font-bold tracking-tight text-foreground hover:text-[#c88746] transition-colors mb-3 block">
+                Tasya<span className="text-[#c88746]">.</span>
+              </button>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                Frontend Developer building modern, performant web experiences with a focus on clean architecture and usability.
               </p>
+              <div className="flex gap-2">
+                {socials.map((s, i) => (
+                  <a
+                    key={i}
+                    href={s.href}
+                    target={s.href.startsWith("http") ? "_blank" : undefined}
+                    rel={s.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                    aria-label={s.label}
+                    className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground
+                               hover:text-[#c88746] hover:border-[#c88746]/40 hover:bg-[#c88746]/10
+                               dark:hover:border-[#c88746]/50 dark:hover:bg-[#c88746]/15
+                               transition-all duration-200"
+                  >
+                    {s.icon}
+                  </a>
+                ))}
+              </div>
             </div>
 
-            {/* Quick Links */}
-            <div className="text-center">
-              <h4 className="text-lg font-semibold text-foreground mb-4">Quick Links</h4>
+            {/* Nav links */}
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
+                {language === "id" ? "Navigasi" : "Navigation"}
+              </h4>
               <nav className="space-y-2">
-                {[
-                  { id: 'home', label: t('home') },
-                  { id: 'about', label: t('about') },
-                  { id: 'experience', label: t('experience') },
-                  { id: 'projects', label: t('projects') },
-                  { id: 'skills', label: t('skills') },
-                  { id: 'contact', label: t('contact') }
-                ].map((item) => (
+                {navLinks.map((link) => (
                   <button
-                    key={item.id}
-                    onClick={() => {
-                      const element = document.getElementById(item.id);
-                      if (element) {
-                        element.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    }}
-                    className="block w-full text-muted-foreground hover:text-amber-600 transition-colors duration-200 text-sm"
+                    key={link.id}
+                    onClick={() => scrollTo(link.id)}
+                    className="block text-sm text-muted-foreground hover:text-[#c88746] transition-colors duration-200"
                   >
-                    {item.label}
+                    {link.label}
                   </button>
                 ))}
               </nav>
             </div>
 
-            {/* Contact Info */}
-            <div className="text-center md:text-right">
-              <h4 className="text-lg font-semibold text-foreground mb-4">Contact</h4>
-              <div className="space-y-2 text-sm">
-                <p className="text-muted-foreground">tasyakhaerani66@gmail.com</p>
-                <p className="text-muted-foreground">+62 857-7194-2063</p>
-                <p className="text-muted-foreground">Jakarta, Indonesia</p>
-                <p className="text-muted-foreground">profile.janubiyyy.tech</p>
+            {/* Contact */}
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
+                {language === "id" ? "Kontak" : "Contact"}
+              </h4>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <a
+                  href="mailto:tasyakhaerani66@gmail.com"
+                  className="block hover:text-[#c88746] transition-colors duration-200"
+                >
+                  tasyakhaerani66@gmail.com
+                </a>
+                <a
+                  href="https://linkedin.com/in/tasyakhaerani/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block hover:text-[#c88746] transition-colors duration-200"
+                >
+                  linkedin.com/in/tasyakhaerani
+                </a>
+                <p>Jakarta, Indonesia</p>
               </div>
             </div>
           </div>
 
-          {/* Bottom */}
-          <div className="border-t border-border pt-8 flex flex-col sm:flex-row justify-between items-center">
-            <p className="text-muted-foreground text-sm text-center sm:text-left">
-              {t('footerText')}
+          {/* Bottom bar */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-border">
+            <p className="text-xs text-muted-foreground">
+              © {new Date().getFullYear()} Tasya Khaerani Janubiya.{" "}
+              {language === "id" ? "Semua hak dilindungi." : "All rights reserved."}
             </p>
-            
             <button
               onClick={scrollToTop}
-              className="mt-4 sm:mt-0 flex items-center space-x-2 text-muted-foreground hover:text-amber-600 transition-colors duration-200 text-sm"
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-[#c88746]
+                         hover:gap-2 transition-all duration-200"
             >
-              <span>Back to top</span>
-              <span>↑</span>
+              <ArrowUp className="w-3.5 h-3.5" />
+              {language === "id" ? "Kembali ke atas" : "Back to top"}
             </button>
           </div>
         </div>

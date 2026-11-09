@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export type Language = 'id' | 'en';
@@ -19,21 +18,22 @@ const translations = {
     experience: 'Pengalaman',
     projects: 'Proyek',
     skills: 'Keahlian',
+    expertise: 'Engineering',
     contact: 'Kontak',
     
     // Hero Section
-    heroTitle: 'Front-End Developer',
-    heroSubtitle: 'Passionate about crafting responsive, user-centric interfaces with clean code and intuitive UX/UI design',
-    heroSubtitleAlt: 'Berpengalaman 3+ tahun dalam pengembangan web modern dengan React.js, Vue.js, dan Next.js',
-    downloadCV: 'Unduh CV',
+    heroTitle: 'Frontend Developer',
+    heroSubtitle: 'Membangun Pengalaman Web yang Skalabel, Berkinerja Tinggi & Berpusat pada Pengguna.',
+    heroDescription: 'Frontend Developer dengan 4+ tahun pengalaman membangun aplikasi web modern, dashboard enterprise, dan antarmuka berbasis data. Spesialis dalam React, Next.js, Vue.js, dan TypeScript, dengan fokus kuat pada arsitektur bersih, performa, usability, dan kode yang mudah dipelihara.',
+    downloadCV: 'Unduh Resume',
     contactMe: 'Hubungi Saya',
+    viewProjects: 'Lihat Proyek Saya',
     
     // About Section
     aboutTitle: 'Tentang Saya',
-    aboutDescription: 'Lulusan Cum Laude Sistem Informasi (IPK 3.61/4.00) dengan 3 tahun keahlian pengembangan front-end, mengkhususkan diri dalam framework modern seperti Next.js, React.js, dan Vue.js. Bersemangat dalam menciptakan antarmuka yang responsif dan berpusat pada pengguna dengan kode yang bersih dan desain UX/UI yang intuitif.',
     yearsExperience: 'Tahun Pengalaman',
     projectsCompleted: 'Proyek Selesai',
-    technologiesMastered: 'Teknologi Dikuasai',
+    technologiesMastered: 'Teknologi Utama',
     
     // Experience Section
     experienceTitle: 'Pengalaman Kerja',
@@ -47,13 +47,13 @@ const translations = {
     
     // Contact Section
     contactTitle: 'Mari Terhubung',
-    contactDescription: 'Tertarik untuk berkolaborasi? Jangan ragu untuk menghubungi saya!',
+    contactDescription: 'Siap membantu mewujudkan solusi web berkinerja tinggi. Mari berdiskusi tentang bagaimana kita bisa berkolaborasi!',
     email: 'Email',
     phone: 'Telepon',
     location: 'Lokasi',
     
     // Footer
-    footerText: 'Dibuat dengan ❤️ oleh Tasya Khaerani',
+    footerText: 'Dirancang & dibangun oleh Tasya Khaerani Janubiya',
     
     // Theme
     lightMode: 'Mode Terang',
@@ -66,21 +66,22 @@ const translations = {
     experience: 'Experience',
     projects: 'Projects',
     skills: 'Skills',
+    expertise: 'Engineering',
     contact: 'Contact',
     
     // Hero Section
-    heroTitle: 'Front-End Developer',
-    heroSubtitle: 'Passionate about crafting responsive, user-centric interfaces with clean code and intuitive UX/UI design',
-    heroSubtitleAlt: '3+ years of experience in modern web development with React.js, Vue.js, and Next.js',
-    downloadCV: 'Download CV',
+    heroTitle: 'Frontend Developer',
+    heroSubtitle: 'Building Scalable, High-Performance & User-Centered Web Experiences.',
+    heroDescription: 'Frontend Developer with 4+ years of experience building modern web applications, enterprise dashboards, and data-driven interfaces. Specialized in React, Next.js, Vue.js, and TypeScript, with a strong focus on clean architecture, performance, usability, and maintainable code.',
+    downloadCV: 'Download Resume',
     contactMe: 'Contact Me',
+    viewProjects: 'View My Projects',
     
     // About Section
     aboutTitle: 'About Me',
-    aboutDescription: 'A Cum Laude Information Systems graduate (GPA 3.61/4.00) with 3 years of front-end development expertise, specializing in modern frameworks like Next.js, React.js, and Vue.js. Passionate about crafting responsive, user-centric interfaces with clean code and intuitive UX/UI design.',
     yearsExperience: 'Years Experience',
-    projectsCompleted: 'Projects Completed',
-    technologiesMastered: 'Technologies Mastered',
+    projectsCompleted: 'Projects Delivered',
+    technologiesMastered: 'Core Frameworks',
     
     // Experience Section
     experienceTitle: 'Work Experience',
@@ -94,13 +95,13 @@ const translations = {
     
     // Contact Section
     contactTitle: 'Let\'s Connect',
-    contactDescription: 'Interested in collaborating? Don\'t hesitate to reach out!',
+    contactDescription: 'Ready to build high-performance web applications. Let\'s discuss how we can collaborate!',
     email: 'Email',
     phone: 'Phone',
     location: 'Location',
     
     // Footer
-    footerText: 'Made with ❤️ by Tasya Khaerani',
+    footerText: 'Designed & built by Tasya Khaerani Janubiya',
     
     // Theme
     lightMode: 'Light Mode',
@@ -109,7 +110,7 @@ const translations = {
 };
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('id');
+  const [language, setLanguage] = useState<Language>('en');
 
   const t = (key: string): string => {
     return translations[language][key as keyof typeof translations[typeof language]] || key;

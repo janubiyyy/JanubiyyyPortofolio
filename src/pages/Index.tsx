@@ -1,6 +1,7 @@
 import React from "react";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import OpeningAnimation from "@/components/OpeningAnimation";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import AboutSection from "@/components/AboutSection";
@@ -14,7 +15,8 @@ const Index = () => {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <div className="min-h-screen bg-background text-foreground">
+        <div className="min-h-screen bg-background text-foreground selection:bg-[#c68a4c] selection:text-white overflow-x-hidden">
+          <OpeningAnimation />
           <Header />
           <main>
             <HeroSection />

@@ -1,121 +1,165 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { GraduationCap, Briefcase, Code2, Users, CheckCircle2, Award } from "lucide-react";
+
+const useInView = (threshold = 0.15) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    if (!ref.current) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          obs.disconnect();
+        }
+      },
+      { threshold }
+    );
+    obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, inView };
+};
 
 const AboutSection = () => {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
+  const { ref, inView } = useInView();
 
-  const aboutDescription =
-    language === "id"
-      ? "Frontend Developer dengan pengalaman lebih dari 3 tahun dalam merancang dan membangun aplikasi web dan mobile yang responsif. Ahli dalam JavaScript, TypeScript, Next.js, , React.js, React Native, dan Vue.js, Nuxt.js, dengan keahlian dalam menciptakan antarmuka yang berorientasi pada pengguna dan mengintegrasikan RESTful APIs. Mahir dalam mengoptimalkan performa, berkolaborasi lintas fungsi, dan mengadopsi teknologi modern untuk menghasilkan solusi yang skalabel dan berkualitas tinggi."
-      : "Frontend Developer with over 3 years of experience designing and building responsive web and mobile applications. Skilled in JavaScript, TypeScript, Next.js,, React.js, React Native, dan Vue.js, Nuxt.Js, with expertise in crafting user-centric interfaces and integrating RESTful APIs. Adept at optimizing performance, collaborating cross-functionally, and adopting modern technologies to deliver scalable, high-quality solutions.";
+  const highlights = [
+    {
+      icon: <Briefcase className="w-5 h-5 text-[#c88746]" />,
+      title: language === "id" ? "4+ Tahun Pengalaman" : "4+ Years Experience",
+      desc:
+        language === "id"
+          ? "Pengembangan sistem internal enterprise skala besar, jalan tol, dan platform e-commerce."
+          : "Enterprise toll operations, high-throughput e-commerce, and high-availability internal portals.",
+    },
+    {
+      icon: <Code2 className="w-5 h-5 text-[#c88746]" />,
+      title: language === "id" ? "Arsitektur Frontend" : "Frontend Architecture",
+      desc:
+        language === "id"
+          ? "Komponen reusable type-safe, modular state management, dan optimasi Core Web Vitals."
+          : "Type-safe reusable UI systems, modular state patterns, and sub-second Core Web Vitals tuning.",
+    },
+    {
+      icon: <Users className="w-5 h-5 text-[#c88746]" />,
+      title: language === "id" ? "Kolaborasi Tim Lintas Fungsi" : "Cross-Functional Synergy",
+      desc:
+        language === "id"
+          ? "Bekerja erat dengan Backend, System Analyst, UI/UX Designer, QA, dan DevOps."
+          : "Seamless collaboration with backend architects, QA engineers, product designers, and DevOps.",
+    },
+    {
+      icon: <GraduationCap className="w-5 h-5 text-[#c88746]" />,
+      title: language === "id" ? "S1 Sistem Informasi (Cum Laude)" : "B.Sc. Information Systems",
+      desc:
+        language === "id"
+          ? "Lulus dengan predikat Cum Laude (IPK 3.61/4.00) dengan fondasi rekayasa perangkat lunak yang kokoh."
+          : "Graduated with Cum Laude honors (3.61 / 4.00 GPA) providing deep software engineering rigor.",
+    },
+  ];
 
-  const qualifications =
+  const aboutParagraphs =
     language === "id"
       ? [
-          "Sarjana Sistem Informasi - IPK 3.61/4.00",
-          "Bersertifikat Database Administration & Web Development",
-          "Berpengalaman dalam metodologi Agile/Scrum",
-          "Track record terbukti dalam optimasi performa (peningkatan 25%)",
-          "Memimpin tim untuk mencapai peningkatan produktivitas 30%",
+          "Saya adalah Frontend Developer dengan lebih dari 4 tahun pengalaman merancang dan mengimplementasikan antarmuka web yang responsif, berpusat pada pengguna, dan berorientasi pada performa tinggi. Sepanjang karier saya, saya telah berkontribusi pada aplikasi skala enterprise — mulai dari portal internal manajemen jalan tol hingga sistem e-commerce dan dashboard analitik berbasis data.",
+          "Keahlian inti saya berakar kuat pada ekosistem React, Next.js, Vue.js, dan TypeScript. Saya terbiasa menerjemahkan arsitektur sistem dan desain Figma menjadi antarmuka yang presisi piksel, modular, dan mudah dipelihara. Saya juga memiliki rekam jejak dalam visualisasi geospasial menggunakan Mapbox GL serta integrasi data real-time.",
+          "Saya terbiasa bekerja dalam lingkungan profesional berbasis CI/CD (Jenkins, GitLab, OpenShift) dan metodologi Agile. Bagi saya, keunggulan frontend terletak pada kode yang bersih, performa yang ringan, dan kemudahan kolaborasi tim jangka panjang.",
         ]
       : [
-          "Bachelor of Information Systems - GPA 3.61/4.00",
-          "Certified in Database Administration & Web Development",
-          "Experienced in Agile/Scrum methodologies",
-          "Proven track record in performance optimization (25% improvement)",
-          "Led teams to achieve 30% productivity increase",
+          "I am a Frontend Developer with 4+ years of hands-on experience architecting and shipping responsive, user-centric, high-performance web applications. My career spans enterprise-scale production systems — from mission-critical toll road operations and dynamic GIS mapping to nationwide e-commerce platforms and business analytics portals.",
+          "My technical core centers around React, Next.js, Vue.js, and TypeScript. I specialize in translating complex Figma specifications into pixel-perfect, highly maintainable, and accessible UI architectures. In addition, I bring proven experience in geospatial mapping with Mapbox GL and real-time REST/WebSocket data visualization.",
+          "I operate comfortably in collaborative DevOps-driven workflows using Jenkins, GitLab CI, and OpenShift clusters. I firmly believe senior engineering is about clean architecture, sub-second latency, and writing code that is a pleasure for teammates to maintain and scale.",
         ];
 
   return (
-    <section id="about" className="py-20 bg-muted/30">
+    <section id="about" className="py-24 relative" aria-label="About section">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              <span className="text-transparent bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text">
-                {t("aboutTitle")}
-              </span>
+        <div ref={ref} className="max-w-6xl mx-auto">
+          
+          {/* Section Header */}
+          <div
+            className={`mb-14 transition-all duration-700 ${
+              inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+            }`}
+          >
+            <span className="section-label mb-3">
+              {language === "id" ? "Tentang Saya" : "Professional Background"}
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground mt-2">
+              {language === "id"
+                ? "Rekayasa Web Berbasis Dampak & Standar Kualitas Tinggi"
+                : "Engineering for Real-World Impact & Rigor"}
             </h2>
-            <div className="w-20 h-1 bg-gradient-to-r from-amber-600 to-orange-600 mx-auto rounded-full"></div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Content */}
-            <div className="space-y-6 animate-slide-in">
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                {aboutDescription}
-              </p>
+          <div className="grid lg:grid-cols-12 gap-10 items-start">
+            
+            {/* Left Bio Content (7 cols) */}
+            <div
+              className={`lg:col-span-7 space-y-6 transition-all duration-700 delay-100 ${
+                inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+              }`}
+            >
+              {aboutParagraphs.map((p, i) => (
+                <p key={i} className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+                  {p}
+                </p>
+              ))}
 
-              <div className="space-y-4">
-                {qualifications.map((qualification, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-amber-600 rounded-full"></div>
-                    <span className="text-foreground">{qualification}</span>
+              {/* Quick Metrics Bar */}
+              <div className="pt-6 border-t border-border/80 grid grid-cols-3 gap-4">
+                <div className="p-4 rounded-xl border border-border/80 bg-card/60 backdrop-blur-md">
+                  <div className="text-2xl sm:text-3xl font-extrabold text-gradient">4+</div>
+                  <div className="text-xs text-muted-foreground font-medium mt-1">
+                    {language === "id" ? "Tahun Pengalaman" : "Years Experience"}
                   </div>
-                ))}
-              </div>
-
-              <div className="pt-6">
-                <div className="grid grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-transparent bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text">
-                      3+
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {t("yearsExperience")}
-                    </div>
+                </div>
+                <div className="p-4 rounded-xl border border-border/80 bg-card/60 backdrop-blur-md">
+                  <div className="text-2xl sm:text-3xl font-extrabold text-gradient">10+</div>
+                  <div className="text-xs text-muted-foreground font-medium mt-1">
+                    {language === "id" ? "Proyek Terkirim" : "Shipped Projects"}
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-transparent bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text">
-                      7+
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {t("projectsCompleted")}
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-transparent bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text">
-                      10+
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {t("technologiesMastered")}
-                    </div>
+                </div>
+                <div className="p-4 rounded-xl border border-border/80 bg-card/60 backdrop-blur-md">
+                  <div className="text-2xl sm:text-3xl font-extrabold text-gradient">3.61</div>
+                  <div className="text-xs text-muted-foreground font-medium mt-1">
+                    Cum Laude GPA
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Visual Element */}
-            <div className="flex justify-center lg:justify-end">
-              <div className="relative">
-                <div className="w-80 h-80 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-600/20 backdrop-blur-sm border border-white/20 dark:border-gray-700/50 p-8">
-                  <div className="w-full h-full rounded-xl bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center text-white">
-                    <div className="text-center">
-                      <div className="text-4xl font-bold mb-2">Code</div>
-                      <div className="text-xl opacity-80">with Passion</div>
-                      <div className="mt-4 w-16 h-1 bg-white/50 mx-auto rounded-full"></div>
-                      <div className="mt-4 text-sm opacity-70">
-                        Creating beautiful
-                        <br />
-                        user experiences
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating elements */}
-                <div className="absolute -top-4 -right-4 w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center text-2xl animate-float">
-                  ⚡
-                </div>
+            {/* Right Highlight Cards (5 cols) */}
+            <div
+              className={`lg:col-span-5 grid grid-cols-1 gap-4 transition-all duration-700 delay-200 ${
+                inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+              }`}
+            >
+              {highlights.map((h, i) => (
                 <div
-                  className="absolute -bottom-4 -left-4 w-12 h-12 bg-green-400 rounded-full flex items-center justify-center text-xl animate-float"
-                  style={{ animationDelay: "1s" }}
+                  key={i}
+                  className="card-base p-5 flex gap-4 items-start group hover:border-[#c88746]/50 hover:shadow-lg hover:shadow-[#c88746]/5 transition-all duration-300"
                 >
-                  💡
+                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#c88746]/10 flex items-center justify-center border border-[#c88746]/20 group-hover:scale-105 transition-transform">
+                    {h.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground group-hover:text-[#c88746] transition-colors">
+                      {h.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                      {h.desc}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
+
           </div>
+
         </div>
       </div>
     </section>
