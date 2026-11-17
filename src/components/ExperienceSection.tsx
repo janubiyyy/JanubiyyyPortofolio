@@ -9,6 +9,11 @@ import {
   ShieldCheck,
   Building2,
   Clock,
+  Camera,
+  Maximize2,
+  X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 interface Experience {
@@ -24,6 +29,10 @@ interface Experience {
   summary: string;
   responsibilities: string[];
   tags: string[];
+  photos?: {
+    src: string;
+    caption: string;
+  }[];
 }
 
 const ExperienceSection: React.FC = () => {
@@ -31,6 +40,13 @@ const ExperienceSection: React.FC = () => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [direction, setDirection] = useState<"up" | "down">("down");
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Photo Lightbox Modal State
+  const [activePhotoModal, setActivePhotoModal] = useState<{
+    photos: { src: string; caption: string }[];
+    company: string;
+  } | null>(null);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
   // 3D Tilt state
   const [tilt, setTilt] = useState({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
@@ -69,6 +85,29 @@ const ExperienceSection: React.FC = () => {
               "Optimizing frontend rendering and Core Web Vitals for smooth, responsive enterprise data management.",
             ],
       tags: ["Next.js", "TypeScript", "REST API", "Jenkins", "GitLab", "OpenShift", "MUI", "Tailwind CSS"],
+      photos: [
+        {
+          src: "/assets/jm1.jpeg",
+          caption:
+            language === "id"
+              ? "Dokumentasi Kerja Operasional Tol Jasa Marga"
+              : "Jasa Marga Toll Operations Work Documentation",
+        },
+        {
+          src: "/assets/jm2.jpeg",
+          caption:
+            language === "id"
+              ? "Lingkungan Kerja & Koordinasi Tim Jasa Marga"
+              : "Jasa Marga Office & Engineering Environment",
+        },
+        {
+          src: "/assets/jm3.jpeg",
+          caption:
+            language === "id"
+              ? "Aktivitas Operasional & Monitoring Jasa Marga"
+              : "Operational Activity & Monitoring at Jasa Marga",
+        },
+      ],
     },
     {
       id: "erlangga",
@@ -101,6 +140,22 @@ const ExperienceSection: React.FC = () => {
               "Implemented progressive image lazy loading and bundle splitting optimizations for responsive user experiences.",
             ],
       tags: ["Vue.js", "React.js", "Vuex", "Redux", "Vuetify", "Ant Design", "Tailwind CSS", "REST API"],
+      photos: [
+        {
+          src: "/assets/eur1.jpeg",
+          caption:
+            language === "id"
+              ? "Dokumentasi Kerja PT Penerbit Erlangga / Eureka"
+              : "Work Documentation at PT Penerbit Erlangga / Eureka",
+        },
+        {
+          src: "/assets/eur2.jpeg",
+          caption:
+            language === "id"
+              ? "Aktivitas Tim Web Engineering Eureka Bookhouse"
+              : "Eureka Bookhouse Web Engineering Team Activity",
+        },
+      ],
     },
     {
       id: "sociolla",
@@ -161,9 +216,22 @@ const ExperienceSection: React.FC = () => {
     setTimeout(() => setIsTransitioning(false), 400);
   }, [activeSlide, experiences.length, isTransitioning]);
 
-  // Keyboard navigation (Up/Down keys)
+  // Keyboard navigation (Up/Down keys for slide, Esc/Left/Right for photo modal)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (activePhotoModal) {
+        if (e.key === "Escape") {
+          setActivePhotoModal(null);
+        } else if (e.key === "ArrowLeft") {
+          setActivePhotoIndex(
+            (prev) => (prev - 1 + activePhotoModal.photos.length) % activePhotoModal.photos.length
+          );
+        } else if (e.key === "ArrowRight") {
+          setActivePhotoIndex((prev) => (prev + 1) % activePhotoModal.photos.length);
+        }
+        return;
+      }
+
       if (e.key === "ArrowUp") {
         e.preventDefault();
         slideUp();
@@ -175,7 +243,7 @@ const ExperienceSection: React.FC = () => {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [slideDown, slideUp]);
+  }, [slideDown, slideUp, activePhotoModal]);
 
   // Touch vertical swipe on mobile
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -215,6 +283,15 @@ const ExperienceSection: React.FC = () => {
 
   const handleMouseLeave = () => {
     setTilt({ x: 0, y: 0, glareX: 50, glareY: 50, opacity: 0 });
+  };
+
+  const openPhotoModal = (initialIndex: number) => {
+    if (!currentExp.photos || currentExp.photos.length === 0) return;
+    setActivePhotoIndex(initialIndex);
+    setActivePhotoModal({
+      photos: currentExp.photos,
+      company: currentExp.company,
+    });
   };
 
   return (
@@ -273,7 +350,7 @@ const ExperienceSection: React.FC = () => {
           {/* Vertical Trajectory Layout: Left Vertical Tabs + Right Vertical 3D Stage */}
           <div className="grid lg:grid-cols-12 gap-8 items-start">
             
-            {/* Left Column: Vertical Timeline Tabs (Tabnya ke Bawah) */}
+            {/* Left Column: Vertical Timeline Tabs */}
             <div className="lg:col-span-4 flex flex-col gap-3 relative">
               
               {/* Subtle Vertical Connector Track (Desktop) */}
@@ -312,12 +389,20 @@ const ExperienceSection: React.FC = () => {
                         <span className="text-[11px] font-mono text-muted-foreground">
                           {exp.period}
                         </span>
-                        {exp.current && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/25">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            Active
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          {exp.photos && exp.photos.length > 0 && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded-md border border-border">
+                              <Camera className="w-2.5 h-2.5 text-[#c88746]" />
+                              <span>{exp.photos.length}</span>
+                            </span>
+                          )}
+                          {exp.current && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/25">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              Active
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <h3
@@ -423,8 +508,62 @@ const ExperienceSection: React.FC = () => {
                   </p>
                 </div>
 
+                {/* Work Documentation Photos Strip */}
+                {currentExp.photos && currentExp.photos.length > 0 && (
+                  <div className="py-4 my-2 border-y border-border/70 relative z-10 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                        <Camera className="w-3.5 h-3.5 text-[#c88746]" />
+                        <span>
+                          {language === "id"
+                            ? "Dokumentasi Kerja & Lingkungan Proyek"
+                            : "Work Documentation & Office Environment"}
+                        </span>
+                      </h4>
+                      <span className="text-[11px] font-mono text-[#8a4b1f] dark:text-[#f0ca9f] font-semibold">
+                        {currentExp.photos.length} {language === "id" ? "Foto Terverifikasi" : "Verified Photos"}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {currentExp.photos.map((photo, pIdx) => (
+                        <button
+                          key={pIdx}
+                          type="button"
+                          onClick={() => openPhotoModal(pIdx)}
+                          className="group relative aspect-[4/3] rounded-2xl overflow-hidden border border-border/80 bg-muted/40 hover:border-[#c88746] transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.02] text-left"
+                          title={language === "id" ? "Klik untuk melihat foto" : "Click to inspect photo"}
+                        >
+                          <img
+                            src={photo.src}
+                            alt={photo.caption}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-108"
+                            loading="lazy"
+                          />
+
+                          {/* Hover Overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-2.5">
+                            <span className="text-[11px] font-medium text-white line-clamp-1 leading-snug">
+                              {photo.caption}
+                            </span>
+                            <span className="text-[9px] font-mono text-emerald-400 mt-0.5 flex items-center gap-1">
+                              <Maximize2 className="w-2.5 h-2.5" />
+                              {language === "id" ? "Perbesar" : "Expand"}
+                            </span>
+                          </div>
+
+                          {/* Camera Icon Badge */}
+                          <div className="absolute top-2 right-2 w-6 h-6 rounded-lg bg-black/45 backdrop-blur-md flex items-center justify-center text-white/90 group-hover:bg-[#c88746] group-hover:text-white transition-colors">
+                            <Camera className="w-3 h-3" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Key Deliverables & Responsibilities */}
-                <div className="space-y-3 relative z-10">
+                <div className="space-y-3 pt-3 relative z-10">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-[#c88746]" />
                     <span>
@@ -488,6 +627,101 @@ const ExperienceSection: React.FC = () => {
 
         </div>
       </div>
+
+      {/* Fullscreen Photo Lightbox Modal */}
+      {activePhotoModal && (
+        <div
+          className="fixed inset-0 z-50 bg-background/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-fade-in"
+          onClick={() => setActivePhotoModal(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full bg-card border border-[#c88746]/40 rounded-3xl overflow-hidden shadow-2xl p-4 sm:p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Top Bar */}
+            <div className="flex items-center justify-between pb-3 border-b border-border/70">
+              <div>
+                <span className="text-[11px] font-mono uppercase tracking-wider text-[#8a4b1f] dark:text-[#f0ca9f] font-bold">
+                  {activePhotoModal.company} • {language === "id" ? "Dokumentasi Kerja" : "Work Documentation"}
+                </span>
+                <h4 className="text-sm font-bold text-foreground mt-0.5">
+                  {activePhotoModal.photos[activePhotoIndex]?.caption}
+                </h4>
+              </div>
+
+              <button
+                onClick={() => setActivePhotoModal(null)}
+                className="p-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                title="Tutup (Esc)"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Main Image Frame */}
+            <div className="relative aspect-[16/10] sm:aspect-[16/9] max-h-[65vh] w-full rounded-2xl overflow-hidden bg-black/60 flex items-center justify-center">
+              <img
+                src={activePhotoModal.photos[activePhotoIndex]?.src}
+                alt={activePhotoModal.photos[activePhotoIndex]?.caption}
+                className="w-full h-full object-contain"
+              />
+
+              {/* Prev / Next buttons */}
+              {activePhotoModal.photos.length > 1 && (
+                <>
+                  <button
+                    onClick={() =>
+                      setActivePhotoIndex(
+                        (activePhotoIndex - 1 + activePhotoModal.photos.length) %
+                          activePhotoModal.photos.length
+                      )
+                    }
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-[#c88746] text-white transition-colors"
+                    title="Foto sebelumnya"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() =>
+                      setActivePhotoIndex(
+                        (activePhotoIndex + 1) % activePhotoModal.photos.length
+                      )
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-[#c88746] text-white transition-colors"
+                    title="Foto selanjutnya"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Modal Bottom Bar with Thumbnails & Counter */}
+            <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center gap-2">
+                {activePhotoModal.photos.map((p, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActivePhotoIndex(idx)}
+                    className={`w-12 h-9 rounded-lg overflow-hidden border-2 transition-all ${
+                      activePhotoIndex === idx
+                        ? "border-[#c88746] scale-105 shadow-md shadow-[#c88746]/20"
+                        : "border-border/70 opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    <img src={p.src} alt="thumb" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+
+              <span className="text-xs font-mono text-muted-foreground">
+                {activePhotoIndex + 1} / {activePhotoModal.photos.length}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
     </section>
   );
 };
